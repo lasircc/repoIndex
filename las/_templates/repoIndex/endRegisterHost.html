@@ -1,0 +1,27 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="col-4">
+    <br>
+    <h2><b>Host Registered</b></h2>
+    <div>
+        <br><br>
+        <b>Hostname: </b>{{ new_host.hostname }}<br>
+        <b>Username: </b>{{ new_host.host_username }}<br>
+        <b>Path: </b>{{ new_host.host_path }}<br>
+        <b>Description: </b>{{ new_host.description }}<br>
+    </div>
+    <!-- <table class="table table-striped">
+        <tr>
+            <th>GenID</th>
+        </tr>
+        {% for i in valid %}
+        <tr>
+            <td>{{ i }}</td>
+        </tr>     
+    {% endfor %}
+    </table> -->
+
+</div>
+{% endblock %}

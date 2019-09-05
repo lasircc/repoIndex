@@ -1,0 +1,34 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="row pt-3 pb-3">
+    <div class="col-4">
+        <h4>Experiment data</h4>
+        <form id="query_experiment" action="{% url 'queryExperiment' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <!-- Hostname:<br>
+                <input class="form-control" type="text" id="query_exp-host" name="hostname"/>
+                <br> -->
+                Experiment name:<br>
+                <input class="form-control" type="text" id="query_exp-name" name="exp_name"/>
+                <br>
+                GenID:<br>
+                <textarea class="form-control" type="text" id="query_exp-genID" rows="4" name="genID"/></textarea>
+                <br>
+                Experiment type:<br>
+                <input class="form-control" type="text" id="query_exp-type" name="exp_type"/>
+                <br>
+                Pipeline:<br>
+                <input class="form-control" type="text" id="query_exp-pipe" name="pipeline"/>
+                <br>
+                Description:<br>
+                <textarea class="form-control" type="text" id="query_exp-description" rows="4" name="description"/></textarea>
+                <br>
+                <input type="submit" id="query_exp-submit" value="Search" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+<!-- <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+</style> -->
+
+<h2><b>Experiment types</b></h2>
+<div>
+    <br>
+    List of the experiments types registered up to now
+    <br><br>
+    <table class="table table-striped">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    {% for exp_type in exp_types %}
+        <tr>
+            <td><b>{{ exp_type.Name }}</b></td>
+            <td>{{ exp_type.Description }}</td>
+        </tr>     
+    {% endfor %}
+    </table>
+</div>
+{% endblock %}

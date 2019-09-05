@@ -1,0 +1,43 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="row pt-3 pb-3">
+    <div class="col-4">
+        <h4>Host register</h4>
+        <form id="host_register" action="{% url 'hostRegister' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                Hostname:<br>
+                <input class="form-control" type="text" id="host_reg-host" name="hostname"/>
+                <br>
+                Username:<br>
+                <input class="form-control" type="text" id="host_reg-username" name="host_username"/>
+                <br>
+                Password:<br>
+                <input class="form-control" type="password" id="host_reg-password" name="host_password"/>
+                <br>
+                Path:<br>
+                <input class="form-control" type="text" id="host_reg-path" name="host_path"/>
+                <br>
+                Description:<br>
+                <textarea class="form-control" type="text" id="host_reg-description" rows="4" name="description"/></textarea>
+                <br>
+                <input type="submit" id="host_reg-submit" value="Add host" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+    <div class="col-4">
+        <h4>Available hosts</h4>
+        <form id="add_experiment_file" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
+            {%csrf_token%}
+            <div class="form-group">
+                make a connectivity test<br>
+                <input type="file" id="add_exp-file" name="exp_file" accept=".json">
+                <br><br>
+                <input type="submit" id="conn_test-submit" value="Connection test" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+</div>
+{% endblock %}

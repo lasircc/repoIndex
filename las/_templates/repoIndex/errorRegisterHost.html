@@ -1,0 +1,18 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="col">
+    <br>
+    <h2><b>Error registering host</b></h2>
+    <div>
+        <br>
+        {{ error_string }}
+        <br>
+        
+        {{ valid|linebreaks }}
+        
+        <br><br>
+    </div>
+</div>
+{% endblock %}

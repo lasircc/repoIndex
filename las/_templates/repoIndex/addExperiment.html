@@ -1,0 +1,49 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="row pt-3 pb-3">
+    <div class="col-4">
+        <h4>Experiment data</h4>
+        <form id="add_experiment" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
+            {%csrf_token%}
+            <div class="form-group">
+                Hostname:<br>
+                <input class="form-control" type="text" id="add_exp-host" name="hostname"/>
+                <br>
+                Experiment name:<br>
+                <input class="form-control" type="text" id="add_exp-name" name="exp_name"/>
+                <br>
+                GenID list:<br>
+                <input type="file" id="add_exp-genID-file" name="exp_genID-file" accept=".json">
+                <br><br>
+                Experiment type:<br>
+                <input class="form-control" type="text" id="add_exp-type" name="exp_type"/>
+                <br>
+                Pipeline:<br>
+                <input class="form-control" type="text" id="add_exp-pipe" name="pipeline"/>
+                <br>
+                Description:<br>
+                <input type="file" id="add_exp-descr-file" name="exp_descr-file" accept=".json">
+                <br><br>
+                <!-- Associate file:<br>
+                <input type="file" id="add_exp-file" name="assoc_file" accept=".json">
+                <br><br> -->
+                <input type="submit" id="add_exp-submit" value="Submit experiment" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+    <div class="col-4">
+        <h4>File upload</h4>
+        <form id="add_experiment_file" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
+            {%csrf_token%}
+            <div class="form-group">
+                Associate file:<br>
+                <input type="file" id="add_exp-file" name="exp_file" accept=".json">
+                <br><br>
+                <input type="submit" id="add_exp_file-submit" value="Submit file" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+</div>
+{% endblock %}

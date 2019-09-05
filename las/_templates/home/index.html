@@ -1,0 +1,124 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+
+{% if user.is_superuser %}
+<div class="row pt-3">
+	<div class="col-4">
+		<div class="card mb-3 border-primary">
+			<div class="card-header text-white bg-primary">
+				Administrator
+			</div>
+			<div class="card-body">
+				<div class="list-group">
+					<a class="list-group-item list-group-item-action" href='{% url "userProfile" %}'>Profile</a>
+					<a class="list-group-item list-group-item-action" href='{% url "landhostManager" %}'>Hosts management</a>	
+					<a class="list-group-item list-group-item-action" href='{% url "schema-swagger-ui" %}'>Swagger</a>				
+				</div>
+			</div>
+			
+		</div>
+	
+	
+	</div>
+	<div class="col-4">
+		<div class="card mb-3 border-warning">
+			<div class="card-header text-white bg-warning">Query & analysis</div>
+			<div class="card-body">
+				<div class="list-group">
+					<!-- <a class="list-group-item list-group-item-action" href="/repoIndex/addExperiment.html">Add experiment</a> -->
+					<!-- build href properly, this is wrong -->
+					<a class="list-group-item list-group-item-action" href='{% url "landaddExperiment" %}'>Add experiment</a>
+					<a class="list-group-item list-group-item-action" href='{% url "landqueryExperimentType" %}'>Experiment types</a>
+					<a class="list-group-item list-group-item-action" href='{% url "landqueryExperiment" %}'>Query</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-4">
+		<div class="card mb-3 border-success">
+			<div class="card-header text-white bg-success">Dashboard</div>
+			<div class="card-body">
+				<p>Well...this is a work in progress</p>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+{% else %}
+
+
+<div class="row pt-3">
+	<div class="col-4">
+		<div class="card mb-3 border-danger">
+			<div class="card-header text-white bg-danger">Biological Samples</div>
+			<div class="card-body">
+				<div class="list-group">
+				</div>
+			</div>
+		</div>
+		<div class="card mb-3 border-warning">
+			<div class="card-header text-white bg-warning">Query & analysis</div>
+			<div class="card-body">
+				<div class="list-group">
+					<a class="list-group-item list-group-item-action" href=''>Analysis</a>
+					<a class="list-group-item list-group-item-action" href=''>Genomic Annotator</a>
+					<a class="list-group-item list-group-item-action" href=''>Query</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-4">
+		<div class="card mb-3 border-primary">
+			<div class="card-header text-white bg-primary">Biological experiments</div>
+			<div class="card-body">
+				<div class="list-group">
+					<a class="list-group-item list-group-item-action" href=''>Digital PCR</a>
+					<a class="list-group-item list-group-item-action" href=''>Liquid Biopsy</a>
+					<a class="list-group-item list-group-item-action" href=''>Microarray</a>
+					<a class="list-group-item list-group-item-action" href=''>Next Generation Sequencing</a>
+					<a class="list-group-item list-group-item-action" href=''>Real-Time PCR</a>
+					<a class="list-group-item list-group-item-action" href=''>Sanger Sequencing</a>
+					<a class="list-group-item list-group-item-action" href=''>Sequenom</a>					
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-4">
+		<div class="card mb-3 border-success">
+			<div class="card-header text-white bg-success">Dashboard</div>
+			<div class="card-body">
+				<p>Insert some stats and the link to open dashboard</p>
+			</div>
+		</div>
+		<div class="card mb-3">
+			<div class="card-header">
+				Profile
+			</div>
+			<div class="card-body">
+				<div class="list-group">
+					{% if userProfile.perm.w.advanced %}
+						
+					{% endif%}
+					
+					<a class="list-group-item list-group-item-action" href='{% url "userProfile" %}'>Profile</a>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+</div>
+
+{% endif%}
+
+	
+
+
+
+{% endblock %}
+
+
