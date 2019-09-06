@@ -80,7 +80,6 @@ def validateGenID(genID_list):
         # print(params)
         r = requests.post('https://las.ircc.it/mdam/api/runtemplate/', data=params, verify=False)
         resp = json.loads(r.text)
-        # {'body': [['CRC0262LMX0A02202TUMD28000', 'False', '2019-05-09', '0', 'None', 'DNA', '344209'], ['CRC0262LMX0A02203TUMLS0100', 'True', '2019-04-11', '0', '2019-04-11', 'LabeledSection', '341690']], 'header': ['Genealogy ID', 'Availability', 'Sampling date', 'Time used', 'Archive date', 'Aliquot type', 'ID']}
 
         for el in resp['body']:
             # print("genID:",el[0])
@@ -147,24 +146,19 @@ class AddExperiment(View):
                     },
                     upsert = True
                     )
-                print("new_exp is:", new_exp.upserted_id)
+                
+                exp_objID = new_exp.upserted_id
+                print("new_exp is:", exp_objID)
 
                 # key = getattr(settings, "SECRET_KEY", None)
                 # print("key is ", key)
 
-                host_cursor = db.hosts.find({"hostname": hostname}).limit(1)
-                # print("password is: ", dumps(password))
-                # username = db.hosts.find({"hostname": hostname}, {"_id": 0, "host_username": 1}).limit(1)
-                # print("username is: ", dumps(username))
-                # path = db.hosts.find({"hostname": hostname}, {"_id": 0, "host_path": 1}).limit(1)
-                # print("path is: ", dumps(path))
-
-                for doc in host_cursor:
-                    print("doc is: ",doc)
-                    exp_objID = doc['_id']
-                    username = doc['host_username']
-                    password = doc['host_password']
-                    path = doc['host_path']
+                doc = db.hosts.find_one({'hostname' : hostname}, {'description' :0, '_id': 0})
+                print("doc is: ",doc)
+                username = doc['host_username']
+                password = doc['host_password']
+                path = doc['host_path']
+                # print("inserted_host is:", inserted_host['host_path'])
 
                 # TODO put Fernet encr and decr in separate fcts
                 key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
@@ -185,14 +179,11 @@ class AddExperiment(View):
                     print(conn_test)
                     return render(request, 'repoIndex/errorUploading.html',{'error_string': conn_test})
 
-                # TODO create file and put it
-
 
                 # TODO put in a fct------------------
                 ssh = paramiko.SSHClient() 
                 host_exist = socket.gethostbyname(hostname)
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                # ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
                 ssh.connect(hostname, username=username, password=decrypted_pw)
                 command="cd " + path + "; mkdir " + str(exp_objID) #add put file
                 # touch filename.json; echo str_file_content >> filename.json
@@ -204,6 +195,12 @@ class AddExperiment(View):
                 # sftp.close()
                 ssh.close()
                 # --------------------------
+            
+
+                exp_path = username+"@"+hostname+path+"/"+str(exp_objID)
+                print("exp_path is:", exp_path)
+
+                db.experiments.update({'_id': exp_objID}, {"$set": {'path': exp_path}})
 
                 return render(request, 'repoIndex/endExperiment.html',{'new_exp': new_exp})
             elif valid == "X":
@@ -219,11 +216,6 @@ class AddExperiment(View):
             # lasuser=User.objects.get(username=request.user.username)
             exp_types = db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
             # db.experiments.insert( { name: "test_exp", genID: "ZZZ9999XXO0W00000000000000", exp_type: "Test", pipeline: "2", description: "Just some blah blah blah"} )
-            # lasuser=User.objects.get(username=request.user.username)
-            # wgList=db.social.find({"@type":"WG", "users": {"$in": [request.user.username ]}})
-            # ### loginas ###
-            # hasPreviousUser = loginas.existsPreviousUser(request)
-            # isSuperUser = request.user.is_superuser
 
         except Exception as e:
             print ('Error AddExperiment', e)
@@ -234,11 +226,6 @@ class QueryExperimentType(View):
     def get(self, request):
         try:
             print("entered QueryExperimentType")
-            # lasuser=User.objects.get(username=request.user.username)
-            # wgList=db.social.find({"@type":"WG", "users": {"$in": [request.user.username ]}})
-            # ### loginas ###
-            # hasPreviousUser = loginas.existsPreviousUser(request)
-            # isSuperUser = request.user.is_superuser
             return render(request, 'repoIndex/queryExperimentType.html')
         except Exception as e:
             print ('Error QueryExperimentType', e)
@@ -287,24 +274,3 @@ class QueryExperiment(View):
         except Exception as e:
             print ('Error QueryExperiment', e)
             return redirect('/')
-
-# @method_decorator([login_required], name='dispatch')
-# class ValidateGenID(View):
-#     def post(self, request):
-#         try:
-#             print("Entered validation API")
-#             # TODO create separate fcts for validations: hostname, genid, fileformat
-#             # received_json_data = json.loads(request.body.decode("utf-8"))
-#             print(request)
-
-
-
-#             # lasuser=User.objects.get(username=request.user.username)
-#             # wgList=db.social.find({"@type":"WG", "users": {"$in": [request.user.username ]}})
-#             # ### loginas ###
-#             # hasPreviousUser = loginas.existsPreviousUser(request)
-#             # isSuperUser = request.user.is_superuser
-#             return render(request, 'repoIndex/validateGenID.html')
-#         except Exception as e:
-#             print ('Error Validation API', e)
-#             return redirect('/')
