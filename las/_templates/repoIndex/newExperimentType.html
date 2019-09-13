@@ -1,0 +1,25 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="row pt-3 pb-3">
+    <div class="col-4">
+        <h4>Insert new experiment type</h4>
+        <form id="add_experiment_type" action="{% url 'newExperimentType' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <!-- Hostname:<br>
+                <input class="form-control" type="text" id="query_exp-host" name="hostname"/>
+                <br> -->
+                Name:<br>
+                <input class="form-control" type="text" id="exp_type-name" name="exp_type_name"/>
+                <br>
+                Description:<br>
+                <textarea class="form-control" type="text" id="exp_type-description" rows="4" name="exp_type_description"/></textarea>
+                <br>
+                <input type="submit" id="add-exp_type-submit" value="Search" class="btn btn-primary"/>
+            </div>
+        </form>   
+    </div>
+</div>
+{% endblock %}

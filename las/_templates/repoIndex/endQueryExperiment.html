@@ -1,25 +1,31 @@
 {% extends "_general/base.html" %}
 
 {% block content %}
-
-<div class="col-4">
+<h2><b>Query results</b></h2>
+<div>
     <br>
-    <h2><b>Query results</b></h2>
-    <div>
-        <br>
-        Experiments matching query
-        <br><br>
-    </div>
+    Experiments matching query
+    <br><br>
     <table class="table table-striped">
         <tr>
+            <th>Name</th>
+            <th>Type</th>
             <th>GenID</th>
+            <th>Description</th>
+            <th>Pipeline</th>
+            <th>Path</th>
         </tr>
-        {% for i in valid %}
+        <!-- {{ results }} -->
+    {% for q in results %}
         <tr>
-            <td>{{ i }}</td>
+            <td><b>{{ q.exp_name }}</b></td>
+            <td>{{ q.exp_type }}</td>
+            <td>{{ q.genID }}</td>
+            <td>{{ q.description }}</td>
+            <td>{{ q.pipeline }}</td>
+            <td>{{ q.path }}</td>
         </tr>     
     {% endfor %}
     </table>
-
 </div>
 {% endblock %}

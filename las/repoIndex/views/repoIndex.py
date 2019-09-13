@@ -32,7 +32,7 @@ class LandAddExperiment(View):
 @method_decorator([login_required], name='dispatch')
 class LandQueryExperimentType(View):
     def get(self, request):
-        exp_types=db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
+        exp_types = db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
         print('exp_types is:',exp_types)
         return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
 
@@ -40,6 +40,11 @@ class LandQueryExperimentType(View):
 class LandQueryExperiment(View):
     def get(self, request):
         return render(request, 'repoIndex/queryExperiment.html')
+
+@method_decorator([login_required], name='dispatch')
+class LandNewExperimentType(View):
+    def get(self, request):
+        return render(request, 'repoIndex/newExperimentType.html')
 
 @method_decorator([login_required], name='dispatch')
 class LandValidateGenID(View):
@@ -232,6 +237,50 @@ class QueryExperimentType(View):
             return redirect('/')
 
 @method_decorator([login_required], name='dispatch')
+class NewExperimentType(View):
+    def post(self, request):
+        try:
+            print("entered NewExperimentType")
+
+            print("exp_type_name = ",request.POST['exp_type_name'])
+            print("exp_type_description = ",request.POST['exp_type_description'])
+
+            exp_type_name = request.POST['exp_type_name']
+            exp_type_description = request.POST['exp_type_description']
+
+            # existing_types = db.experiment_types.find({'Name' : exp_type_name})
+            existing_types = db.experiment_types.find_one({'Name' : exp_type_name},{"_id":0})
+
+            if existing_types:
+                existing_name = existing_types['Name']
+                existing_desc = existing_types['Description']
+                print("exist name", existing_name)
+                print("exist desc", existing_desc)
+                error_string = "Sorry but type \""+exp_type_name+"\" already exists. \n Name: "+existing_name+"\n Description: "+existing_desc
+                print(error_string)
+                return render(request, 'repoIndex/errorNewExperimentType.html',{'error_string': error_string})
+            
+            new_exp_type = db.experiment_types.update_one(
+                    { 'Name': exp_type_name },
+                    {"$setOnInsert":{
+                        'Name': exp_type_name,
+                        'Description': exp_type_description,
+                        }
+                    },
+                    upsert = True
+                    )
+                
+            inserted_type = db.experiment_types.find_one({'Name' : exp_type_name})
+            print("inserted_type is:", inserted_type)
+
+            return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': new_exp_type}) #TODO fix this
+
+        except Exception as e:
+            print ('Error NewExperimentType', e)
+            return redirect('/')
+
+
+@method_decorator([login_required], name='dispatch')
 class QueryExperiment(View):
     def post(self, request):
         try:
@@ -242,35 +291,54 @@ class QueryExperiment(View):
             print("genID = ",request.POST['genID'])
             print("exp_type = ",request.POST['exp_type'])
             print("pipeline = ",request.POST['pipeline'])
+            print("path = ",request.POST['path'])
             print("description = ",request.POST['description'])
 
             exp_name = request.POST['exp_name']
-            genID = request.POST['genID']
+            exp_genID = request.POST['genID']
             exp_type = request.POST['exp_type']
             pipeline = request.POST['pipeline']
+            exp_path = request.POST['path']
             description = request.POST['description']
+
+            if exp_genID != "":
+                genID = exp_genID.split("\r\n")
+                print("genId is:",genID)
+                print("len genid:", len(genID))
+            else:
+                genID = ""
 
             query = {}
             if exp_name != "":
-                query['exp_name'] = { '$eq': exp_name }
+                # query['exp_name'] = { '$eq': exp_name }
+                query['exp_name'] = { '$regex' : ".*"+exp_name+".*" }
             if genID != "":
-                query['genID'] = {'$in': genID} # $in neeed array and genID is not, transform it into
+                query['genID'] = { '$in': genID }
             if exp_type != "":
-                query['exp_type'] = { '$eq': exp_type }
+                # query['exp_type'] = { '$eq': exp_type }
+                query['exp_type'] = { '$regex' : ".*"+exp_type+".*" }
+            if exp_path != "":
+                query['path'] = { '$regex' : ".*"+exp_path+".*" }
             if pipeline != "":
-                query['pipeline'] = { '$eq': pipeline }
-            # if description != "":
-            #     query['description'] = {'/.*description.*/} <---- check this for like query
+                # query['pipeline'] = { '$eq': pipeline }
+                query['pipeline'] = { '$regex' : ".*"+pipeline+".*" }
+            if description != "":
+                query['description'] = { '$regex' : ".*"+description+".*" }
+
+            #add filters by user
 
             print("query is:", query)
-            results = db.experiments.find(query)
+            results = list(db.experiments.find(query,{"_id":0}).sort("exp_name",pymongo.ASCENDING))
             for doc in results:
                 print(doc)
 
-            exp_types=db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
+            # exp_types=db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
+            # print('exp_types is:',exp_types)
+            # return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
 
             query_msg = "query results here"
-            return render(request, 'repoIndex/endQueryExperiment.html',{'query_msg': query_msg})
+            return render(request, 'repoIndex/endQueryExperiment.html',{'results': results})
         except Exception as e:
             print ('Error QueryExperiment', e)
             return redirect('/')
+
