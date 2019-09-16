@@ -9,8 +9,23 @@
             {%csrf_token%}
             <div class="form-group">
                 Hostname:<br>
-                <input class="form-control" type="text" id="add_exp-host" name="hostname"/>
+                <div class="typeahead__container">
+                    <div class="typeahead__field">
+                        <div class="typeahead__query">
+                            <input class="js-typeahead-country_v1" name="country_v1[query]" type="search" placeholder="Search" autocomplete="off">
+                            <!-- <input class="js-typeahead-user_v1" name="user_v1[query]" type="search" placeholder="Search" autocomplete="off"> -->
+                        </div>
+                        <!-- <div class="typeahead__button">
+                            <button type="submit">
+                                <i class="typeahead__search-icon"></i>
+                            </button>
+                        </div> -->
+                    </div>
+                </div>
                 <br>
+                <!-- Hostname:<br>
+                <input class="form-control" type="text" id="add_exp-host" name="hostname"/>
+                <br> -->
                 Experiment name:<br>
                 <input class="form-control" type="text" id="add_exp-name" name="exp_name"/>
                 <br>

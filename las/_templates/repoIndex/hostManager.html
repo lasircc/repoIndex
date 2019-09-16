@@ -4,7 +4,7 @@
 
 <div class="row pt-3 pb-3">
     <div class="col-4">
-        <h4>Host register</h4>
+        <h4>New host register</h4>
         <form id="host_register" action="{% url 'hostRegister' %}" method="POST">
             {%csrf_token%}
             <div class="form-group">
@@ -27,17 +27,28 @@
             </div>
         </form>   
     </div>
-    <div class="col-4">
+    <div class="col-8">
         <h4>Available hosts</h4>
-        <form id="add_experiment_file" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
-            {%csrf_token%}
-            <div class="form-group">
-                make a connectivity test<br>
-                <input type="file" id="add_exp-file" name="exp_file" accept=".json">
-                <br><br>
-                <input type="submit" id="conn_test-submit" value="Connection test" class="btn btn-primary"/>
-            </div>
-        </form>   
+        <br>
+        <table class="table table-striped">
+                <tr>
+                    <th>Status</th>
+                    <th>Service</th>
+                    <th>Path</th>
+                </tr>
+                <!-- {{ results }} -->
+            {% for q in conn_results %}
+                <tr>
+                    {% if q.status == "UP" %}
+                        <td><span class="badge badge-pill badge-success">UP</span></td>
+                    {% else %}
+                        <td><span class="badge badge-pill badge-danger">DOWN</span></td>
+                    {% endif %}
+                    <td>{{ q.address }}</td>
+                    <td>{{ q.path }}</td>
+                </tr>     
+            {% endfor %}
+            </table>
     </div>
 </div>
 {% endblock %}

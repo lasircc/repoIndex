@@ -217,11 +217,6 @@ class AddExperiment(View):
                 print(error_string)
                 return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string, 'valid': valid})
 
-            # print("description = ",request.POST['description'])
-            # lasuser=User.objects.get(username=request.user.username)
-            exp_types = db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
-            # db.experiments.insert( { name: "test_exp", genID: "ZZZ9999XXO0W00000000000000", exp_type: "Test", pipeline: "2", description: "Just some blah blah blah"} )
-
         except Exception as e:
             print ('Error AddExperiment', e)
             return redirect('/')
@@ -248,7 +243,6 @@ class NewExperimentType(View):
             exp_type_name = request.POST['exp_type_name']
             exp_type_description = request.POST['exp_type_description']
 
-            # existing_types = db.experiment_types.find({'Name' : exp_type_name})
             existing_types = db.experiment_types.find_one({'Name' : exp_type_name},{"_id":0})
 
             if existing_types:
@@ -273,7 +267,7 @@ class NewExperimentType(View):
             inserted_type = db.experiment_types.find_one({'Name' : exp_type_name})
             print("inserted_type is:", inserted_type)
 
-            return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': new_exp_type}) #TODO fix this
+            return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': inserted_type}) #TODO fix this
 
         except Exception as e:
             print ('Error NewExperimentType', e)
@@ -336,7 +330,6 @@ class QueryExperiment(View):
             # print('exp_types is:',exp_types)
             # return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
 
-            query_msg = "query results here"
             return render(request, 'repoIndex/endQueryExperiment.html',{'results': results})
         except Exception as e:
             print ('Error QueryExperiment', e)

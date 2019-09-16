@@ -10,10 +10,7 @@ import socket
 import bcrypt
 import base64
 
-@method_decorator([login_required], name='dispatch')
-class LandHostManager(View):
-    def get(self, request):
-        return render(request, 'repoIndex/hostManager.html')
+key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
 
 def get_key(password):
     try:
@@ -28,17 +25,20 @@ def get_key(password):
 def testConnection(hostname,username,password,path):
     #connectivity test
     try:
+        print("entered testConnection")
         ssh = paramiko.SSHClient()
-        # transport = paramiko.Transport((hostname, 22))
-        # sftp = paramiko.SFTPClient.from_transport(transport)
-        # ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        # ssh.load_system_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
         host_exist = socket.gethostbyname(hostname)
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            f = Fernet(key)
+            decrypted_pw = f.decrypt(password)
+            password=decrypted_pw.decode()
+        except:
+            pass
+
+        print("testconnection username=",username)
         ssh.connect(hostname, username = username, password = password)
-        # command="ls -lha"
-        # stdin , stdout, stderr = ssh.exec_command(command)
-        # print(stdout.read())
         command = "stat " + path #or stat
         print("command is:",command)
         stdin, stdout, stderr = ssh.exec_command(command)
@@ -49,13 +49,6 @@ def testConnection(hostname,username,password,path):
         if len(stderr) > 0:
             print("Failed to open path " + path + " on " + hostname)
             return ("P")
-
-        # read[i]=t_read[360:375]
-        # raw_speed[i]=t_read[360:364]
-        # address[i]=t_read[221:233]
-        # print('Receieved data on cable %s from %s via IP: %s at %s \n'%(Cable[i],WMI_Port[i],address[i],read[i]))
-        # stdin, stdout, stderr = ssh.exec_command('sudo ifconfig %s down'%(target_eth[i]))
-        # print ('Disabling %s : \n\n'%(WMI_Port[i]))
         ssh.close()    
         return ("OK")
     except paramiko.ssh_exception.NoValidConnectionsError as error:
@@ -97,7 +90,6 @@ class HostRegister(View):
     def post(self, request):
         try:
             print("entered HostRegister")
-            # print("request is: ",request.POST)
 
             print("hostname = ",request.POST['hostname'])
             print("host_username = ",request.POST['host_username'])
@@ -111,15 +103,21 @@ class HostRegister(View):
             host_path = request.POST['host_path']
             description = request.POST['description']
 
+            existing_service = db.hosts.find_one({'hostname' : hostname, 'host_username' : host_username, 'host_path' : host_path},{"_id":0})
+
+            if existing_service:
+                print("exist host_name", existing_service['hostname'])
+                print("exist host_username", existing_service['host_username'])
+                print("exist host_path", existing_service['host_path'])
+                error_string = "Sorry but this service is already registered\n\n Address: " + existing_service['host_username'] + "@" + existing_service['hostname'] + "\n Path: " + existing_service['host_path']
+                print(error_string)
+                return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})
+            
+
             valid = testConnection(hostname,host_username,host_password,host_path)
             print("valid is:", valid)
 
             if valid == "OK":
-
-                # key = getattr(settings, "SECRET_KEY", None)
-                # print("key is ", key)
-
-                key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
 
                 message = host_password.encode()
                 print("K:",key)
@@ -133,16 +131,6 @@ class HostRegister(View):
                     error_string = "An error occurred during password encryption"
                     print(error_string)
                     return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})
-
-                # hashed_password = bcrypt.hashpw(host_password.encode('utf-8'), bcrypt.gensalt())
-                # print("hashed_password is:", hashed_password)
-                # pw_hash_test = bcrypt.checkpw(host_password.encode('utf-8'), hashed_password)
-                # print("Pwd hash check =" , pw_hash_test)
-                
-                # if pw_hash_test is not True:
-                #     error_string = "An error occurred during password hashing"
-                #     print(error_string)
-                #     return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})
 
                 new_host = db.hosts.update_one(
                     { 'hostname': hostname },
@@ -160,8 +148,6 @@ class HostRegister(View):
                 # inserted_host = db.hosts.find().sort([("_id", -1)]).limit(1) 
                 inserted_host = db.hosts.find_one({'hostname' : hostname})
                 print("inserted_host is:", inserted_host)
-                # for doc in inserted_host:
-                #     print("inserted_host is:", doc)
                 return render(request, 'repoIndex/endRegisterHost.html',{'new_host': inserted_host})
             elif valid == "P":
                 error_string = "Failed to open path " + host_path + " on " + hostname + ": \n it may not exist or user " + host_username + " does not have permission to access"
@@ -176,3 +162,39 @@ class HostRegister(View):
         except Exception as e:
             print ('Error HostRegister API', e)
             return redirect('/')
+
+@method_decorator([login_required], name='dispatch')
+class LandHostManager(View):
+    def get(self, request):
+        try:
+            existing_hosts = db.hosts.find({},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
+            # conn_results = {}
+            conn_results = []
+            for doc in existing_hosts:
+                host_status = {}
+                print("existing_hosts is:", doc)
+                hostname = doc['hostname']
+                username = doc['host_username']
+                password = doc['host_password']
+                path = doc['host_path']
+                print("hostname=",hostname)
+                print("username=",username)
+                print("password=",password)
+                print("path=",path)
+                valid = testConnection(hostname,username,password,path)
+                print("valid connection test is:",valid)
+                if valid == "OK":
+                    status = "UP"
+                else:
+                    status = "DOWN"
+                address = username+"@"+hostname
+                host_status["address"] = address
+                host_status["path"] = path
+                host_status["status"] = status
+                conn_results.append(host_status.copy())
+            print("conn_results is: ",conn_results)
+        
+        except Exception as e:
+            print ('Error LandHostManager API', e)
+            return redirect('/')
+        return render(request, 'repoIndex/hostManager.html',{'conn_results': list(conn_results)})
