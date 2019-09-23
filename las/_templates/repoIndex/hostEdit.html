@@ -1,0 +1,53 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<br>
+<h4>Modify host parameters for {{ host_edit.address }}</h4>
+<div class="row pt-3 pb-3">
+    <div class="col-5">
+        If you need to modify the username or the host, just create a new service <a href="{% url 'landhostManager' %}">here</a>.
+        <br><br>
+        <b>Host: </b>{{ host_edit.address }}<br>
+        <br>
+        <b>Current Path: </b>{{ host_edit.path }}
+        <br><br>
+        <form id="host_change_path" action="{% url 'hostEdit' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <label for="host_change_path"><b>New Path:</b></label>
+                <input class="form-control" type="text" id="host_change_path" name="host_change_path"/>
+                <input type="hidden" id="host_change-address" name="host_change_address" value="{{ host_edit.address }}"/>
+                <input type="hidden" id="host_change-orig_path" name="host_change_orig_path" value="{{ host_edit.path }}"/>
+                <br>
+                <input type="submit" id="host_change_path-submit" value="Change path" class="btn btn-primary"/>
+            </div>
+        </form>   
+        <br><br>
+        <form id="host_change_password" action="{% url 'hostEdit' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <label for="host_change_path"><b>New Password:</b></label>
+                <input class="form-control" type="password" id="host_change_password" name="host_change_password"/>
+                <input type="hidden" id="host_change-address" name="host_change_address" value="{{ host_edit.address }}"/>
+                <!-- <input type="hidden" id="host_change-orig_path" name="host_change_orig_path" value="{{ host_edit.path }}"/> -->
+                <br>
+                <input type="submit" id="host_change_password-submit" value="Change password" class="btn btn-primary"/>
+            </div>
+        </form>
+        <br><br>
+        <form id="host_delete" action="{% url 'hostEdit' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <label for="host_delete"><b>Disable this service</b></label>
+                <input type="hidden" id="host_change-address" name="host_change_address" value="{{ host_edit.address }}"/>
+                <input type="hidden" id="host_change-orig_path" name="host_change_orig_path" value="{{ host_edit.path }}"/>
+                <br>
+                <input type="submit" id="host_delete-submit" value="Disable host" class="btn btn-warning"/>
+                <br>
+                You will not see in anymore in available hosts
+            </div>
+        </form>   
+    </div>
+
+{% endblock %}

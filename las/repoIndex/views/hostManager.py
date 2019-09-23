@@ -2,7 +2,9 @@ from .__init__ import *
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
+from django.http import JsonResponse
 import pymongo
+from pymongo.collection import ReturnDocument
 import requests
 import os
 import paramiko
@@ -158,9 +160,105 @@ class HostRegister(View):
                 print(error_string)
                 return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string, 'valid': valid})
 
-            return render(request, 'repoIndex/endHostRegister.html')
         except Exception as e:
             print ('Error HostRegister API', e)
+            return redirect('/')
+
+@method_decorator([login_required], name='dispatch')
+class LandHostEdit(View):
+    def post(self, request):
+        try:
+            print("entered LandHostEdit")
+            print("hostname = ",request.POST['host_edit_address'])
+            print("host_username = ",request.POST['host_edit_path'])
+            host_edit = {}
+            host_edit['address'] = request.POST['host_edit_address']
+            host_edit['path'] = request.POST['host_edit_path']
+            # if description needed query the db here and pass it to the next view
+            print("host_edit is:", host_edit)
+            return render(request, 'repoIndex/hostEdit.html', {'host_edit': host_edit})
+
+        except Exception as e:
+            print ('Error LandHostEdit', e)
+            return redirect('/')
+
+@method_decorator([login_required], name='dispatch')
+class HostEdit(View):
+    def post(self, request):
+        try:
+            print("entered HostEdit")
+            # if 'host_change_path' in request.POST:
+            #     print("request is: ",request.POST)
+            #     print("host = ",request.POST['host_change_address'])
+            #     print("host_path = ",request.POST['host_change_path'])
+            #     print("host_orig_path = ",request.POST['host_change_orig_path'])
+
+            #     address = request.POST['host_change_address']
+            #     host_new_path = request.POST['host_change_path']
+            #     host_orig_path = request.POST['host_change_orig_path']
+            #     username = address.split('@')[0]
+            #     hostname = address.split('@')[1]
+
+            #     print("username is: ",username)
+            #     print("hostname is: ",hostname)
+
+            #     target_host = db.hosts.find_one_and_update(
+            #             {'hostname' : hostname, 'host_username' : username, 'host_path' : host_orig_path},
+            #             {"$set":{
+            #                 'host_path': host_new_path,
+            #                 }
+            #             },
+            #             return_document = ReturnDocument.AFTER
+            #             )
+                        
+            #     modified_host_id = target_host['_id']
+            #     print("modified target_host is:", modified_host_id)
+
+            #     modified_host = db.hosts.find_one({"_id" : modified_host_id })
+            #     print("modified_host is:", modified_host)
+            #     return render(request, 'repoIndex/endRegisterHost.html',{'modified_host': modified_host})
+
+
+            if 'host_change_password' in request.POST:
+                print("host = ",request.POST['host_change_address'])
+                # print("host_new_password = ",request.POST['host_change_password'])
+
+                address = request.POST['host_change_address']
+                host_new_password = request.POST['host_change_password']
+                username = address.split('@')[0]
+                hostname = address.split('@')[1]
+
+                print("username is: ",username)
+                print("hostname is: ",hostname)
+
+                message = host_new_password.encode()
+                print("K:",key)
+                f = Fernet(key)
+                print("F:",f)
+                encrypted_pw = f.encrypt(message)
+                # decrypted_pw = f.decrypt(encrypted_pw)
+                print("ENC",encrypted_pw)
+
+                target_host = db.hosts.find_one_and_update(
+                        {'hostname' : hostname, 'host_username' : username},
+                        {"$set":{
+                            'host_password': encrypted_pw,
+                            }
+                        },
+                        return_document = ReturnDocument.AFTER
+                        )
+
+                modified_host_id = target_host['_id']
+                print("modified target_host is:", modified_host_id)
+
+                modified_host = db.hosts.find_one({"_id" : modified_host_id })
+                print("modified_host is:", modified_host)
+                return render(request, 'repoIndex/endRegisterHost.html',{'modified_host': modified_host})
+
+            
+
+        except Exception as e:
+            print ('Error HostEdit', e)
             return redirect('/')
 
 @method_decorator([login_required], name='dispatch')
@@ -183,18 +281,39 @@ class LandHostManager(View):
                 print("path=",path)
                 valid = testConnection(hostname,username,password,path)
                 print("valid connection test is:",valid)
+
                 if valid == "OK":
                     status = "UP"
+                elif valid == "P":
+                    status = "PATH"
                 else:
                     status = "DOWN"
+
                 address = username+"@"+hostname
                 host_status["address"] = address
                 host_status["path"] = path
                 host_status["status"] = status
                 conn_results.append(host_status.copy())
+
             print("conn_results is: ",conn_results)
+            return render(request, 'repoIndex/hostManager.html',{'conn_results': list(conn_results)})
         
         except Exception as e:
             print ('Error LandHostManager API', e)
             return redirect('/')
-        return render(request, 'repoIndex/hostManager.html',{'conn_results': list(conn_results)})
+
+class AutocompleteHostsAddExperiment(View):
+    def get(self, request):
+        try:
+            print("REQUEST IS:", request.GET)
+            if request.GET.get("q"):
+                print("received query")
+                param = str(request.GET.get("q"))
+                print ("param is:", param)
+                known_hosts = db.hosts.find({ "hostname": {'$regex' : ".*"+param+".*", '$options': "ix"} },{"_id":0}).sort("hostname",pymongo.ASCENDING)
+                # doc = db[dbcollection].find({fieldFilter:{"$regex":regex, "$options": 'ix'}, 'access_w': {'$exists': True, '$in': user['heritage']['w']} }).limit(10)
+                print('known_hosts is:', known_hosts)
+                return JsonResponse(to_json(known_hosts), safe=False)
+        except Exception as e:
+            print ('Error AutocompleteHostsAddExperiment API', e)
+            return redirect('/')

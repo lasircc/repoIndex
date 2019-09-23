@@ -56,10 +56,12 @@
 	<script defer src="{% static "node_modules/toastr/build/toastr.min.js" %}"></script>
 	<script defer src="{% static "node_modules/pdfmake/build/pdfmake.min.js" %}"></script>
 	<script defer src="{% static "node_modules/pdfmake/build/vfs_fonts.js" %}"></script>
-	<script defer src="{% static "js/bootstrap-ajax-typeahead-master/js/bootstrap-typeahead.min.js" %}" type="text/javascript"></script>
+	<script defer src="{% static "node_modules/jquery-typeahead/dist/jquery.typeahead.min.js" %}"></script>
 	<script defer src="{% static "node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.js" %}"></script>
 	<script defer src="{% static "node_modules/moment/min/moment-with-locales.min.js" %}"></script>
 	<script defer src="{% static "node_modules/tempusdominus-bootstrap-4/build/js/tempusdominus-bootstrap-4.min.js" %}"></script>
+
+	<script defer src="{% static "repoIndex/typeahead.js" %}"></script>
 	
 	<script defer src="{% static "node_modules/multiselect/js/jquery.multi-select.js" %}"></script>
 	
@@ -71,6 +73,7 @@
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css" %}" />
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css" %}" />
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/multiselect/css/multi-select.css" %}" />
+	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/jquery-typeahead/dist/jquery.typeahead.min.css"  %}"/>
 	
 	
 	<script defer type="text/javascript" src="{% static "js/csrfToken.js" %}"></script>

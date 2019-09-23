@@ -4,6 +4,8 @@
 
 <div class="col-4">
     <br>
+
+    {% if new_host %}
     <h2><b>Host Registered</b></h2>
     <div>
         <br><br>
@@ -12,6 +14,18 @@
         <b>Path: </b>{{ new_host.host_path }}<br>
         <b>Description: </b>{{ new_host.description }}<br>
     </div>
+    {% endif %}
+
+    {% if modified_host %}
+    <h2><b>Host Modified</b></h2>
+    <div>
+        <br><br>
+        <b>Hostname: </b>{{ modified_host.hostname }}<br>
+        <b>Username: </b>{{ modified_host.host_username }}<br>
+        <b>Path: </b>{{ modified_host.host_path }}<br>
+        <b>Description: </b>{{ modified_host.description }}<br>
+    </div>
+    {% endif %}
     <!-- <table class="table table-striped">
         <tr>
             <th>GenID</th>

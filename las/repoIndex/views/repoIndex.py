@@ -2,11 +2,15 @@ from .__init__ import *
 from .hostManager import *
 from jsonschema import validate
 from bson.json_util import dumps
+from django.http import JsonResponse
+from bson.objectid import ObjectId
 import pymongo
 import requests
 import os
 import paramiko
 import bcrypt
+
+key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
 
 genID_schema = {
     "type" : "object",
@@ -32,9 +36,23 @@ class LandAddExperiment(View):
 @method_decorator([login_required], name='dispatch')
 class LandQueryExperimentType(View):
     def get(self, request):
-        exp_types = db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
-        print('exp_types is:',exp_types)
-        return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
+        try:
+            print("REQUEST IS:", request.GET)
+            if request.GET.get("q"):
+                print("received query")
+                param = str(request.GET.get("q"))
+                print ("param is:", param)
+                exp_types = db.experiment_types.find({ "Name": {'$regex' : ".*"+param+".*", '$options': "ix"} },{"_id":0}).sort("Name",pymongo.ASCENDING)
+                # doc = db[dbcollection].find({fieldFilter:{"$regex":regex, "$options": 'ix'}, 'access_w': {'$exists': True, '$in': user['heritage']['w']} }).limit(10)
+                print('exp_types is:', exp_types)
+                return JsonResponse(to_json(exp_types), safe=False)
+            else:
+                exp_types = db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
+                print('exp_types is:',exp_types)
+                return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
+        except Exception as e:
+            print ('Error LandQueryExperimentType', e)
+            return redirect('/')
 
 @method_decorator([login_required], name='dispatch')
 class LandQueryExperiment(View):
@@ -101,6 +119,56 @@ def validateGenID(genID_list):
         print ('Error validateGenID', e)
         return ("X")
 
+def makeexperimentfolder(hostname,username,password,path,exp_id):
+    try:
+        ssh = paramiko.SSHClient() 
+        host_exist = socket.gethostbyname(hostname)
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname, username=username, password=password)
+        command="cd " + path + "; mkdir " + str(exp_id)
+        # touch filename.json; echo str_file_content >> filename.json
+        print("executing ",command)
+        stdin , stdout, stderr = ssh.exec_command(command)
+        print(stdout.read())
+        # sftp = ssh.open_sftp()
+        # sftp.put(localpath, path)
+        # sftp.close()
+        ssh.close()
+        return ("OK")
+    except paramiko.ssh_exception.NoValidConnectionsError as error:
+        # print("Failed to connect to host '%s' with error: %s" % (hostname, error))
+        error_msg = "Failed to connect to host " + hostname + " with error " + str(error)
+        print(error_msg)
+        ssh.close()
+        return (error_msg)
+    except paramiko.AuthenticationException as authexp:
+        error_msg = "Authentication failed for user " + username + "@" + hostname + " with provided password.\n Please verify your credentials"
+        print(error_msg)
+        ssh.close()
+        return (error_msg)
+    except paramiko.SSHException as sshException:
+        print("Could not establish SSH connection: ", sshException)
+        error_msg = "Could not establish SSH connection"
+        print(sshException)
+        ssh.close()
+        return (error_msg)
+    except socket.timeout as e:
+        print("Connection timed out")
+        error_msg = "Connection timed out"
+        print(e)
+        ssh.close()
+        return (error_msg)
+    except socket.error as e:
+        print("socket Error")
+        error_msg = "Failed to resolve hostname " + hostname +" \n"+str(e)
+        ssh.close()
+        return (error_msg)
+    except Exception as e:
+        error_msg = "Error occurred during connection test: " + str(e)
+        print(error_msg)
+        ssh.close()
+        return (error_msg)
+
 @method_decorator([login_required], name='dispatch')
 class AddExperiment(View):
     def post(self, request):
@@ -114,6 +182,7 @@ class AddExperiment(View):
             exp_name = request.POST['exp_name']
             exp_type = request.POST['exp_type']
             pipeline = request.POST['pipeline']
+            exp_host_username = request.POST['exp_host_username']
 
             wb_genID = request.FILES['exp_genID-file'].read()
             # print(wb_genID)
@@ -155,10 +224,15 @@ class AddExperiment(View):
                 exp_objID = new_exp.upserted_id
                 print("new_exp is:", exp_objID)
 
+                if exp_objID is None:
+                    error_string = "The chosen Experiment Name already exists"
+                    print(error_string)
+                    return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string})
+
                 # key = getattr(settings, "SECRET_KEY", None)
                 # print("key is ", key)
 
-                doc = db.hosts.find_one({'hostname' : hostname}, {'description' :0, '_id': 0})
+                doc = db.hosts.find_one({'hostname' : hostname, 'host_username' : exp_host_username}, {'description' :0, '_id': 0})
                 print("doc is: ",doc)
                 username = doc['host_username']
                 password = doc['host_password']
@@ -166,7 +240,6 @@ class AddExperiment(View):
                 # print("inserted_host is:", inserted_host['host_path'])
 
                 # TODO put Fernet encr and decr in separate fcts
-                key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
                 print("K:",key)
                 f = Fernet(key)
                 print("F:",f)
@@ -184,30 +257,20 @@ class AddExperiment(View):
                     print(conn_test)
                     return render(request, 'repoIndex/errorUploading.html',{'error_string': conn_test})
 
-
-                # TODO put in a fct------------------
-                ssh = paramiko.SSHClient() 
-                host_exist = socket.gethostbyname(hostname)
-                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                ssh.connect(hostname, username=username, password=decrypted_pw)
-                command="cd " + path + "; mkdir " + str(exp_objID) #add put file
-                # touch filename.json; echo str_file_content >> filename.json
-                print("executing ",command)
-                stdin , stdout, stderr = ssh.exec_command(command)
-                print(stdout.read())
-                # sftp = ssh.open_sftp()
-                # sftp.put(localpath, path)
-                # sftp.close()
-                ssh.close()
-                # --------------------------
+                make_folder = makeexperimentfolder(hostname,username,decrypted_pw,path,exp_objID)
+                print("make_folder is: ", make_folder)
+                if make_folder != "OK":
+                    print(conn_test)
+                    return render(request, 'repoIndex/errorUploading.html',{'error_string': make_folder})
             
-
                 exp_path = username+"@"+hostname+path+"/"+str(exp_objID)
                 print("exp_path is:", exp_path)
-
                 db.experiments.update({'_id': exp_objID}, {"$set": {'path': exp_path}})
+                
+                inserted_exp = db.experiments.find_one({"_id" : exp_objID })
+                print("inserted_exp is:", inserted_exp)
 
-                return render(request, 'repoIndex/endExperiment.html',{'new_exp': new_exp})
+                return render(request, 'repoIndex/endExperiment.html',{'inserted_exp': inserted_exp})
             elif valid == "X":
                 error_string = "An error occurred in genID validation stage"
                 # return render(request, 'repoIndex/errorUploading.html',{'exp_types': exp_types})
@@ -267,12 +330,11 @@ class NewExperimentType(View):
             inserted_type = db.experiment_types.find_one({'Name' : exp_type_name})
             print("inserted_type is:", inserted_type)
 
-            return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': inserted_type}) #TODO fix this
+            return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': inserted_type})
 
         except Exception as e:
             print ('Error NewExperimentType', e)
             return redirect('/')
-
 
 @method_decorator([login_required], name='dispatch')
 class QueryExperiment(View):

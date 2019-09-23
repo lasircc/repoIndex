@@ -35,20 +35,29 @@
                     <th>Status</th>
                     <th>Service</th>
                     <th>Path</th>
+                    <th></th>
                 </tr>
                 <!-- {{ results }} -->
-            {% for q in conn_results %}
-                <tr>
-                    {% if q.status == "UP" %}
-                        <td><span class="badge badge-pill badge-success">UP</span></td>
-                    {% else %}
-                        <td><span class="badge badge-pill badge-danger">DOWN</span></td>
-                    {% endif %}
-                    <td>{{ q.address }}</td>
-                    <td>{{ q.path }}</td>
-                </tr>     
-            {% endfor %}
-            </table>
+                {% for q in conn_results %}
+                    <tr>
+                        {% if q.status == "UP" %}
+                            <td><span class="badge badge-pill badge-success">UP</span></td>
+                        {% elif q.status == "PATH" %}
+                            <td><span class="badge badge-pill badge-warning">PATH</span></td>
+                        {% else %}
+                            <td><span class="badge badge-pill badge-danger">DOWN</span></td>
+                        {% endif %}
+                        <td>{{ q.address }}</td>
+                        <td>{{ q.path }}</td>
+                        <form id="host_edit" action="{% url 'landhostEdit' %}" method="POST">
+                            {%csrf_token%}
+                            <input type="hidden" id="host_edit-address" name="host_edit_address" value="{{ q.address }}"/>
+                            <input type="hidden" id="host_edit-path" name="host_edit_path" value="{{ q.path }}"/>
+                            <td><input type="submit" id="host_edit-submit" value="Edit" class="btn btn-primary btn-sm"/></td>
+                        </form>
+                    </tr>     
+                {% endfor %}
+        </table>
     </div>
 </div>
 {% endblock %}

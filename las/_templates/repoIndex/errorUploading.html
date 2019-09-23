@@ -10,6 +10,7 @@
         {{ error_string|linebreaks }}
         <br><br>
     </div>
+    {% if valid %}
     <table class="table table-striped">
         <tr>
             <th>GenID</th>
@@ -20,6 +21,6 @@
         </tr>     
     {% endfor %}
     </table>
-
+    {% endif %}
 </div>
 {% endblock %}
