@@ -8,13 +8,35 @@
     <div>
         <br><br>
         <h3>Experiment:</h3>
-        <b>Name: </b>{{ inserted_exp.exp_name }}<br>
-        <b>Type: </b>{{ inserted_exp.exp_type }}<br>
+        <b>Name: </b>{{ inserted_exp.name }}<br>
+        <b>Type: </b>{{ inserted_exp.type }}<br>
         <b>GenID: </b>{{ inserted_exp.genID }}<br>
         <b>Description: </b>{{ inserted_exp.description }}<br>
         <br><br>
         <h3>Created folder at:</h3>
-        <b>Path: </b>{{ inserted_exp.path }}<br>
+        <b>Path: </b>
+        <div id="new_path">{{ inserted_exp.path }}</div><br>
+        <!-- <label id = "new_path">{{ inserted_exp.path }}</label><br> -->
+        <!-- <select id = "selectBox" onchange = "changeFunc()">
+            <option value="path">Path</option>
+            <option value="ssh">SSH</option>
+            <option value="ftp">FTP</option>
+            <option value="sftp">SFTP</option>
+          </select> -->
+          <!-- Example single danger button -->
+<div class="btn-group">
+    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Copy to clipboard
+    </button>
+    <div class="dropdown-menu">
+      <a class="dropdown-item" onclick="new_exp_copyclipboard_ssh(document.getElementById('new_path').innerHTML)">SSH</a>
+      <a class="dropdown-item" onclick="new_exp_copyclipboard_scp(document.getElementById('new_path').innerHTML)">SCP</a>
+      <a class="dropdown-item" onclick="new_exp_copyclipboard_sftp(document.getElementById('new_path').innerHTML)">SFTP</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" onclick="new_exp_copyclipboard_justpath(document.getElementById('new_path').innerHTML)">Just path</a>
+    </div>
+  </div>
+        <!-- <button id="end_exp-copyclipboard" onclick="new_exp_copyclipboard()" class="btn btn-primary">Copy!</button> -->
     </div>
 </div>
 {% endblock %}

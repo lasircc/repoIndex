@@ -17,6 +17,7 @@ urlpatterns = [
     path('queryExperiment/', QueryExperiment.as_view(), name='queryExperiment'),
     path('hostManager/', HostRegister.as_view(), name='hostRegister'),
     path('hostEdit/', HostEdit.as_view(), name='hostEdit'),
+    path('existingHostsTest/', ExistingHostsTest.as_view(), name='existingHostsTest'),
     path('autocompleteHostsAddExperiment/', AutocompleteHostsAddExperiment.as_view(), name='autocompleteHostsAddExperiment'),
     # path('validateGenID/', ValidateGenID.as_view(), name='validateGenID')
     # path('addUser/', AddUser.as_view(), name="addUser")

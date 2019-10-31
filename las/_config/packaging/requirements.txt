@@ -37,3 +37,4 @@ ontospy>=1.9.8.2
 django-redis
 paramiko>=2.0
 bcrypt>=3.1.7
+simplejson>=3.10.0

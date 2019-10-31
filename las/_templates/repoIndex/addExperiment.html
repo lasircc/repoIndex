@@ -3,8 +3,10 @@
 {% block content %}
 
 <div class="row pt-3 pb-3">
-    <div class="col-4">
-        <h4>Experiment data</h4>
+    <div class="col-5">
+        <h4>Experiment file upload</h4>
+        Look for a registered hostname and select username and path before upload the file.
+        <br><br>
         <form id="add_experiment" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
             {%csrf_token%}
             <div class="form-group">
@@ -29,36 +31,36 @@
                 <!-- Hostname:<br>
                 <input class="form-control" type="text" id="add_exp-host" name="hostname"/>
                 <br> -->
-                Experiment name:<br>
+                <!-- Experiment name:<br>
                 <input class="form-control" type="text" id="add_exp-name" name="exp_name"/>
-                <br>
-                GenID list:<br>
-                <input type="file" id="add_exp-genID-file" name="exp_genID-file" accept=".json">
+                <br> -->
+                Experiment File:<br>
+                <input type="file" id="add_exp-file" name="exp_file" accept=".json">
                 <br><br>
-                Experiment Type:<br>
+                <!-- Experiment Type:<br>
                 <div class="typeahead__container">
                     <div class="typeahead__field">
                         <div class="typeahead__query">
-                            <input class="js-typeahead-types_v2" name="exp_type" type="search" placeholder="Search" autocomplete="off">
+                            <input class="js-typeahead-types_v2" name="exp_type" type="search" placeholder="Search" autocomplete="off"> -->
                             <!-- <input class="js-typeahead-user_v1" name="user_v1[query]" type="search" placeholder="Search" autocomplete="off"> -->
-                        </div>
+                        <!-- </div> -->
                         <!-- <div class="typeahead__button">
                             <button type="submit">
                                 <i class="typeahead__search-icon"></i>
                             </button>
                         </div> -->
-                    </div>
-                </div>
-                <br>
+                    <!-- </div> -->
+                <!-- </div> -->
+                <!-- <br> -->
                 <!-- Experiment type:<br>
                 <input class="form-control" type="text" id="add_exp-type" name="exp_type"/>
                 <br> -->
-                Pipeline:<br>
+                <!-- Pipeline:<br>
                 <input class="form-control" type="text" id="add_exp-pipe" name="pipeline"/>
                 <br>
                 Description:<br>
                 <input type="file" id="add_exp-descr-file" name="exp_descr-file" accept=".json">
-                <br><br>
+                <br><br> -->
                 <!-- Associate file:<br>
                 <input type="file" id="add_exp-file" name="assoc_file" accept=".json">
                 <br><br> -->
@@ -66,7 +68,7 @@
             </div>
         </form>   
     </div>
-    <div class="col-4">
+    <!-- <div class="col-4">
         <h4>File upload</h4>
         <form id="add_experiment_file" action="{% url 'addExperiment' %}" method="POST" enctype="multipart/form-data">
             {%csrf_token%}
@@ -77,6 +79,6 @@
                 <input type="submit" id="add_exp_file-submit" value="Submit file" class="btn btn-primary"/>
             </div>
         </form>   
-    </div>
+    </div> -->
 </div>
 {% endblock %}

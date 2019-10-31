@@ -26,6 +26,34 @@
         <b>Description: </b>{{ modified_host.description }}<br>
     </div>
     {% endif %}
+
+    {% if disabled_host %}
+    <h2><b>Host Disabled</b></h2>
+    <div>
+        <br>
+        This host has been removed from the available services
+        <br><br>
+        <b>Hostname: </b>{{ disabled_host.hostname }}<br>
+        <b>Username: </b>{{ disabled_host.host_username }}<br>
+        <b>Path: </b>{{ disabled_host.host_path }}<br>
+        <b>Description: </b>{{ disabled_host.description }}<br>
+        <b>Enabled: </b>{{ disabled_host.enabled }}<br>
+    </div>
+    {% endif %}
+
+    {% if enabled_host %}
+    <h2><b>Host Disabled</b></h2>
+    <div>
+        <br>
+        This host has been added the available services
+        <br><br>
+        <b>Hostname: </b>{{ enabled_host.hostname }}<br>
+        <b>Username: </b>{{ enabled_host.host_username }}<br>
+        <b>Path: </b>{{ enabled_host.host_path }}<br>
+        <b>Description: </b>{{ enabled_host.description }}<br>
+        <b>Enabled: </b>{{ enabled_host.enabled }}<br>
+    </div>
+    {% endif %}
     <!-- <table class="table table-striped">
         <tr>
             <th>GenID</th>

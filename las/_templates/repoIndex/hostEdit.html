@@ -6,7 +6,7 @@
 <h4>Modify host parameters for {{ host_edit.address }}</h4>
 <div class="row pt-3 pb-3">
     <div class="col-5">
-        If you need to modify the username or the host, just create a new service <a href="{% url 'landhostManager' %}">here</a>.
+        If you need to modify username, hostname or path, just create a new service <a href="{% url 'landhostManager' %}">here</a>.
         <br><br>
         <b>Host: </b>{{ host_edit.address }}<br>
         <br>
@@ -36,18 +36,35 @@
             </div>
         </form>
         <br><br>
-        <form id="host_delete" action="{% url 'hostEdit' %}" method="POST">
+        {% if host_edit.toggle == "DISABLED" %}
+        <form id="host_enable" action="{% url 'hostEdit' %}" method="POST">
             {%csrf_token%}
             <div class="form-group">
-                <label for="host_delete"><b>Disable this service</b></label>
-                <input type="hidden" id="host_change-address" name="host_change_address" value="{{ host_edit.address }}"/>
-                <input type="hidden" id="host_change-orig_path" name="host_change_orig_path" value="{{ host_edit.path }}"/>
+                <label for="host_enable"><b>Enable this service</b></label>
+                <input type="hidden" id="host_enable" name="host_enable" value="{{ host_edit.address }}"/>
+                <!-- <input type="hidden" id="host_disable" name="host_disable" value="{{ host_edit.path }}"/> -->
                 <br>
-                <input type="submit" id="host_delete-submit" value="Disable host" class="btn btn-warning"/>
+                <input type="submit" id="host_enable-submit" value="Enable host" class="btn btn-warning"/>
                 <br>
-                You will not see in anymore in available hosts
+                You will see this service in available hosts
             </div>
-        </form>   
+        </form>
+        {% endif %}
+
+        {% if host_edit.toggle == "ENABLED" %}
+        <form id="host_disable" action="{% url 'hostEdit' %}" method="POST">
+            {%csrf_token%}
+            <div class="form-group">
+                <label for="host_disable"><b>Disable this service</b></label>
+                <input type="hidden" id="host_disable" name="host_disable" value="{{ host_edit.address }}"/>
+                <!-- <input type="hidden" id="host_disable" name="host_disable" value="{{ host_edit.path }}"/> -->
+                <br>
+                <input type="submit" id="host_disable-submit" value="Disable host" class="btn btn-warning"/>
+                <br>
+                You will not see it anymore in available hosts
+            </div>
+        </form>
+        {% endif %}  
     </div>
 
 {% endblock %}

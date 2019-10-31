@@ -9,24 +9,27 @@ import requests
 import os
 import paramiko
 import bcrypt
+import fileinput
+import jsonschema
+import simplejson as json
 
 key = b'n_jrI9S9ivI9iYQDEfVPqfntsxFyfSBp8375JFvIsxM='
 
-genID_schema = {
-    "type" : "object",
-    "properties" : {
-        "genID" : {"type" : "array"},
-    },
-    "required": ["genID"]
-}
+# genID_schema = {
+#     "type" : "object",
+#     "properties" : {
+#         "genID" : {"type" : "array"},
+#     },
+#     "required": ["genID"]
+# }
 
-descr_schema = {
-    "type" : "object",
-    "properties" : {
-        "description" : {"type" : "string"},
-    },
-    "required": ["description"]
-}
+# descr_schema = {
+#     "type" : "object",
+#     "properties" : {
+#         "description" : {"type" : "string"},
+#     },
+#     "required": ["description"]
+# }
 
 @method_decorator([login_required], name='dispatch')
 class LandAddExperiment(View):
@@ -69,9 +72,11 @@ class LandValidateGenID(View):
     def get(self, request):
         return render(request, 'repoIndex/validateGenID.html')
 
-def validateJSONschema(json_file,schema):
+def validateJSONschema_old(json_file,schema):
     try:
         data = json.loads(json_file)
+        print(data)
+        # print("Schema is:", schema)
         validate(instance=data, schema=schema)
         print("JSON valid")
         return (data)
@@ -80,17 +85,49 @@ def validateJSONschema(json_file,schema):
         # print(err_msg)
         return (err_msg)
 
-def wrapvalidateJSONschema(json_file,schema,request):
+def validateJSONschema(data):
     try:
-        schema_valid = validateJSONschema(json_file,schema)
-        if schema_valid != "OK":
-            print(schema_valid)
-            return RedirectIfWrong(request,'repoIndex/errorUploading.html',{'error_string': str(schema_valid)})
-        return "OK"
+        print("entered validateJSONschema")
+        with open('genomic_metadata.schema.json', 'r') as f:
+            schema_data = f.read()
+            schema = json.loads(schema_data)
     except Exception as e:
-        err_msg = "Error in JSON schema validation function"
+        err_msg = "Error in JSON schema file: " + str(e)
         print(err_msg)
-        return RedirectIfWrong(request,'repoIndex/errorUploading.html',{'error_string': str(err_msg)})
+        return (err_msg)
+    try:
+        validation = jsonschema.validate(data, schema)
+        print("JSON valid")
+        return (data)
+    except Exception as e:
+        err_msg = "Error in validating against JSON schema: " + str(e)
+        print(err_msg)
+        return (err_msg)
+
+def extract_GenID(key, var):
+    print("entered extract_GenID")
+    arr = []
+    for j in var:
+        if hasattr(j,'items'):
+            # print("j is:",j)
+            for k, v in j.items():
+                if j[key] == True:
+                    if k == key:
+                        print("found",key,"= True for",j['id'])
+                        arr.append(j['id'])
+    return arr
+
+# def wrapvalidateJSONschema(json_file,schema,request):
+#     try:
+#         schema_valid = validateJSONschema(json_file,schema)
+#         if schema_valid != "OK":
+#             print(schema_valid)
+#             return RedirectIfWrong(request,'repoIndex/errorUploading.html',{'error_string': str(schema_valid)})
+#         return "OK"
+#     except Exception as e:
+#         err_msg = "Error in JSON schema validation function"
+#         print(err_msg)
+#         return RedirectIfWrong(request,'repoIndex/errorUploading.html',{'error_string': str(err_msg)})
 
 def validateGenID(genID_list):
     try:
@@ -175,106 +212,109 @@ class AddExperiment(View):
         try:
             print("entered AddExperiment")
             # print("request is: ",request.POST)
-            print("request genID file is: ",request.FILES['exp_genID-file'])
-            print("request descr file is: ",request.FILES['exp_descr-file'])
+            print("request genID file is: ",request.FILES['exp_file'])
 
             hostname = request.POST['hostname']
-            exp_name = request.POST['exp_name']
-            exp_type = request.POST['exp_type']
-            pipeline = request.POST['pipeline']
+            # exp_name = request.POST['exp_name']
+            # exp_type = request.POST['exp_type']
             exp_host_username = request.POST['exp_host_username']
 
-            wb_genID = request.FILES['exp_genID-file'].read()
-            # print(wb_genID)
-            # data_genID = json.loads(wb_genID)
-            # print(data_genID)
-            data_genID = validateJSONschema(wb_genID,genID_schema)
-            print("schema_valid of genID file = OK")
-            if "Error" in data_genID:
-                print(data_genID)
-                return render(request,'repoIndex/errorUploading.html',{'error_string': data_genID})
-            
-            wb_descr = request.FILES['exp_descr-file'].read()
-            # print(wb_descr)
-            # data_descr = json.loads(wb_descr)
-            # print(data_descr)
-            data_descr = validateJSONschema(wb_descr,descr_schema)
-            print("schema_valid of description file = OK")
-            if "Error" in data_descr:
-                print(data_descr)
-                return render(request,'repoIndex/errorUploading.html',{'error_string': data_descr})
+            wb_expFile = request.FILES['exp_file'].read()
+            wb = wb_expFile.decode("utf-8")
+            data_exp = json.loads(wb)
+            print("data_exp is:")
+            print(data_exp)
+            # print("wb")
+            # print(wb)
+            # data_expFile = json.loads(wb_expFile)
+            # print(data_expFile)
+            data_expFile = validateJSONschema(data_exp)
+            if "file" in data_expFile:
+                print(data_expFile)
+                return render(request,'repoIndex/errorUploading.html',{'error_string': data_expFile})
+            elif "validating" in data_expFile:
+                print(data_expFile)
+                return render(request,'repoIndex/errorUploading.html',{'error_string': data_expFile})
 
-            valid = validateGenID(data_genID['genID'])
+            print("schema_valid of experiment file = OK")
+            print("About to extract genIDs from json file")
+            genid_list = list(extract_GenID("LAS_Validation",data_exp['samples_map']))
+            print("GENIDS are:")
+            print(genid_list)
+            valid = validateGenID(genid_list)
             print("valid is:", valid)
 
             if valid == "OK":
-                new_exp = db.experiments.update_one(
-                    { 'exp_name': exp_name },
-                    {"$setOnInsert":{
-                        'exp_name': exp_name,
-                        'genID': data_genID['genID'],
-                        'exp_type': exp_type,
-                        'pipeline': pipeline,
-                        'description': data_descr['description']
-                        }
-                    },
-                    upsert = True
-                    )
-                
-                exp_objID = new_exp.upserted_id
-                print("new_exp is:", exp_objID)
-
-                if exp_objID is None:
+                exp_name = data_exp['name']
+                print("exp_name is:", exp_name)
+                existing_exp = db.experiments.find_one({'name': exp_name})
+                print("existing_exp is:",existing_exp)
+                if existing_exp is not None:
                     error_string = "The chosen Experiment Name already exists"
                     print(error_string)
                     return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string})
+                else:
+                    new_exp = db.experiments.insert_one(data_exp)
+                # if valid == "OK":
+                #     new_exp = db.experiments.update_one(
+                #         { 'exp_name': exp_name },
+                #         {"$setOnInsert":{
+                #             'exp_name': exp_name,
+                #             'genID': data_expFile['genID'],
+                #             'exp_type': exp_type,
+                #             'pipeline': pipeline,
+                #             'description': data_descr['description']
+                #             }
+                #         },
+                #         upsert = True
+                #         )
+                    
+                    exp_objID = new_exp.inserted_id
+                    print("new_exp _id is:", exp_objID)
 
-                # key = getattr(settings, "SECRET_KEY", None)
-                # print("key is ", key)
+                    doc = db.hosts.find_one({'hostname' : hostname, 'host_username' : exp_host_username}, {'description' :0, '_id': 0})
+                    print("doc is: ",doc)
+                    username = doc['host_username']
+                    password = doc['host_password']
+                    path = doc['host_path']
+                    # print("inserted_host is:", inserted_host['host_path'])
 
-                doc = db.hosts.find_one({'hostname' : hostname, 'host_username' : exp_host_username}, {'description' :0, '_id': 0})
-                print("doc is: ",doc)
-                username = doc['host_username']
-                password = doc['host_password']
-                path = doc['host_path']
-                # print("inserted_host is:", inserted_host['host_path'])
+                    # TODO put Fernet encr and decr in separate fcts decrypted_pw=fct(key,password)
+                    print("K:",key)
+                    f = Fernet(key)
+                    print("F:",f)
+                    encrypted_pw = password
+                    decrypted_pw = f.decrypt(encrypted_pw)
+                    print("ENC",encrypted_pw)
 
-                # TODO put Fernet encr and decr in separate fcts
-                print("K:",key)
-                f = Fernet(key)
-                print("F:",f)
-                encrypted_pw = password
-                decrypted_pw = f.decrypt(encrypted_pw)
-                print("ENC",encrypted_pw)
+                    # print(username['host_username'])
+                    # print(password['host_password'])
+                    # print(path['host_path'])
+                    # decrypted_pw = decr(key,password)
+                    conn_test = testConnection(hostname,username,decrypted_pw,path)
+                    print("conn_test is: ", conn_test)
+                    if conn_test != "OK":
+                        print(conn_test)
+                        return render(request, 'repoIndex/errorUploading.html',{'error_string': conn_test})
 
-                # print(username['host_username'])
-                # print(password['host_password'])
-                # print(path['host_path'])
-
-                conn_test = testConnection(hostname,username,decrypted_pw,path)
-                print("conn_test is: ", conn_test)
-                if conn_test != "OK":
-                    print(conn_test)
-                    return render(request, 'repoIndex/errorUploading.html',{'error_string': conn_test})
-
-                make_folder = makeexperimentfolder(hostname,username,decrypted_pw,path,exp_objID)
-                print("make_folder is: ", make_folder)
-                if make_folder != "OK":
-                    print(conn_test)
-                    return render(request, 'repoIndex/errorUploading.html',{'error_string': make_folder})
-            
-                exp_path = username+"@"+hostname+path+"/"+str(exp_objID)
-                print("exp_path is:", exp_path)
-                db.experiments.update({'_id': exp_objID}, {"$set": {'path': exp_path}})
+                    make_folder = makeexperimentfolder(hostname,username,decrypted_pw,path,exp_objID)
+                    print("make_folder is: ", make_folder)
+                    if make_folder != "OK":
+                        print(conn_test)
+                        return render(request, 'repoIndex/errorUploading.html',{'error_string': make_folder})
                 
-                inserted_exp = db.experiments.find_one({"_id" : exp_objID })
-                print("inserted_exp is:", inserted_exp)
+                    exp_path = username+"@"+hostname+path+"/"+str(exp_objID)
+                    print("exp_path is:", exp_path)
+                    db.experiments.update({'_id': exp_objID}, {"$set": {'path': exp_path}})
+                    
+                    inserted_exp = db.experiments.find_one({"_id" : exp_objID })
+                    print("inserted_exp is:", inserted_exp)
 
-                return render(request, 'repoIndex/endExperiment.html',{'inserted_exp': inserted_exp})
+                    return render(request, 'repoIndex/endExperiment.html',{'inserted_exp': inserted_exp})
             elif valid == "X":
-                error_string = "An error occurred in genID validation stage"
-                # return render(request, 'repoIndex/errorUploading.html',{'exp_types': exp_types})
+                error_string = "An error occurred in GenID validation stage"
                 print(error_string)
+                return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string})
             else:
                 error_string = "Sorry but the following GenIDs are not in the LAS database: \n"
                 print(error_string)

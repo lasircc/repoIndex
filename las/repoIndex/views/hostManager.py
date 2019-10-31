@@ -129,7 +129,7 @@ class HostRegister(View):
                 decrypted_pw = f.decrypt(encrypted_pw)
                 print("ENC",encrypted_pw)
                 
-                if encrypted_pw == decrypted_pw is not True:
+                if message == decrypted_pw is not True:
                     error_string = "An error occurred during password encryption"
                     print(error_string)
                     return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})
@@ -141,7 +141,8 @@ class HostRegister(View):
                         'host_username': host_username,
                         'host_password': encrypted_pw,
                         'host_path': host_path,
-                        'description': description
+                        'description': description,
+                        'enabled': True
                         }
                     },
                     upsert = True
@@ -171,9 +172,11 @@ class LandHostEdit(View):
             print("entered LandHostEdit")
             print("hostname = ",request.POST['host_edit_address'])
             print("host_username = ",request.POST['host_edit_path'])
+            print("host_toggle = ",request.POST['host_edit_toggle'])
             host_edit = {}
             host_edit['address'] = request.POST['host_edit_address']
             host_edit['path'] = request.POST['host_edit_path']
+            host_edit['toggle'] = request.POST['host_edit_toggle']
             # if description needed query the db here and pass it to the next view
             print("host_edit is:", host_edit)
             return render(request, 'repoIndex/hostEdit.html', {'host_edit': host_edit})
@@ -220,7 +223,7 @@ class HostEdit(View):
 
 
             if 'host_change_password' in request.POST:
-                print("host = ",request.POST['host_change_address'])
+                print("host change password = ",request.POST['host_change_address'])
                 # print("host_new_password = ",request.POST['host_change_password'])
 
                 address = request.POST['host_change_address']
@@ -246,7 +249,7 @@ class HostEdit(View):
                             }
                         },
                         return_document = ReturnDocument.AFTER
-                        )
+                    )
 
                 modified_host_id = target_host['_id']
                 print("modified target_host is:", modified_host_id)
@@ -255,7 +258,51 @@ class HostEdit(View):
                 print("modified_host is:", modified_host)
                 return render(request, 'repoIndex/endRegisterHost.html',{'modified_host': modified_host})
 
-            
+            if 'host_disable' in request.POST:
+                print("host disable = ",request.POST['host_disable'])
+
+                address = request.POST['host_disable']
+                username = address.split('@')[0]
+                hostname = address.split('@')[1]
+
+                target_host = db.hosts.find_one_and_update(
+                        {'hostname' : hostname, 'host_username' : username},
+                        {"$set":{
+                            'enabled': False,
+                            }
+                        },
+                        return_document = ReturnDocument.AFTER
+                    )
+                
+                disabled_host_id = target_host['_id']
+                print("disabled target_host is:", disabled_host_id)
+
+                disabled_host = db.hosts.find_one({"_id" : disabled_host_id })
+                print("disabled_host is:", disabled_host)
+                return render(request, 'repoIndex/endRegisterHost.html',{'disabled_host': disabled_host})
+
+            if 'host_enable' in request.POST:
+                print("host enable = ",request.POST['host_enable'])
+
+                address = request.POST['host_enable']
+                username = address.split('@')[0]
+                hostname = address.split('@')[1]
+
+                target_host = db.hosts.find_one_and_update(
+                        {'hostname' : hostname, 'host_username' : username},
+                        {"$set":{
+                            'enabled': True,
+                            }
+                        },
+                        return_document = ReturnDocument.AFTER
+                    )
+                
+                enabled_host_id = target_host['_id']
+                print("enabled target_host is:", enabled_host_id)
+
+                enabled_host = db.hosts.find_one({"_id" : enabled_host_id })
+                print("enabled_host is:", enabled_host)
+                return render(request, 'repoIndex/endRegisterHost.html',{'enabled_host': enabled_host})
 
         except Exception as e:
             print ('Error HostEdit', e)
@@ -265,7 +312,50 @@ class HostEdit(View):
 class LandHostManager(View):
     def get(self, request):
         try:
-            existing_hosts = db.hosts.find({},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
+            print("entered LandHostManager")
+            existing_disabled_hosts = db.hosts.find({"enabled": False},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
+            # conn_results = {}
+            disabled_hosts = []
+            for doc in existing_disabled_hosts:
+                host_status = {}
+                print("existing_disabled_hosts is:", doc)
+                hostname = doc['hostname']
+                username = doc['host_username']
+                password = doc['host_password']
+                path = doc['host_path']
+                print("hostname=",hostname)
+                print("username=",username)
+                print("password=",password)
+                print("path=",path)
+                # valid = testConnection(hostname,username,password,path)
+                # print("valid connection test is:",valid)
+
+                # if valid == "OK":
+                #     status = "UP"
+                # elif valid == "P":
+                #     status = "PATH"
+                # else:
+                #     status = "DOWN"
+
+                address = username+"@"+hostname
+                host_status["address"] = address
+                host_status["path"] = path
+                host_status["status"] = status
+                disabled_hosts.append(host_status.copy())
+
+            print("disabled_hosts is: ",disabled_hosts)
+            return render(request, 'repoIndex/hostManager.html', {'disabled_hosts': disabled_hosts})
+        
+        except Exception as e:
+            print ('Error LandHostManager API', e)
+            return redirect('/')
+
+@method_decorator([login_required], name='dispatch')
+class ExistingHostsTest(View):
+    def post(self, request):
+        try:
+            print("entered ExistingHostsTest")
+            existing_hosts = db.hosts.find({"enabled": True},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
             # conn_results = {}
             conn_results = []
             for doc in existing_hosts:
@@ -280,6 +370,7 @@ class LandHostManager(View):
                 print("password=",password)
                 print("path=",path)
                 valid = testConnection(hostname,username,password,path)
+                # valid="OK"
                 print("valid connection test is:",valid)
 
                 if valid == "OK":
@@ -296,10 +387,11 @@ class LandHostManager(View):
                 conn_results.append(host_status.copy())
 
             print("conn_results is: ",conn_results)
-            return render(request, 'repoIndex/hostManager.html',{'conn_results': list(conn_results)})
+            return JsonResponse(conn_results, safe=False)
+            # return conn_results
         
         except Exception as e:
-            print ('Error LandHostManager API', e)
+            print ('Error ExistingHostsTest API', e)
             return redirect('/')
 
 class AutocompleteHostsAddExperiment(View):
@@ -310,7 +402,7 @@ class AutocompleteHostsAddExperiment(View):
                 print("received query")
                 param = str(request.GET.get("q"))
                 print ("param is:", param)
-                known_hosts = db.hosts.find({ "hostname": {'$regex' : ".*"+param+".*", '$options': "ix"} },{"_id":0}).sort("hostname",pymongo.ASCENDING)
+                known_hosts = db.hosts.find({ "hostname": {'$regex' : ".*"+param+".*", '$options': "ix"}, "enabled": True },{"_id":0}).sort("hostname",pymongo.ASCENDING)
                 # doc = db[dbcollection].find({fieldFilter:{"$regex":regex, "$options": 'ix'}, 'access_w': {'$exists': True, '$in': user['heritage']['w']} }).limit(10)
                 print('known_hosts is:', known_hosts)
                 return JsonResponse(to_json(known_hosts), safe=False)
