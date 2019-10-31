@@ -128,8 +128,10 @@ class HostRegister(View):
                 encrypted_pw = f.encrypt(message)
                 decrypted_pw = f.decrypt(encrypted_pw)
                 print("ENC",encrypted_pw)
+                # print("decrypted_pw: ",decrypted_pw)
+                # print("message: ",message)
                 
-                if message == decrypted_pw is not True:
+                if message != decrypted_pw:
                     error_string = "An error occurred during password encryption"
                     print(error_string)
                     return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})

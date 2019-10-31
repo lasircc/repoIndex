@@ -8,7 +8,7 @@ function new_exp_copyclipboard_ssh(str) {
   // ssh -t username@hostname "cd /path; bash"
   var host = str.substr(0, str.indexOf('/'))
   var path = str.substring(str.indexOf('/')+1)
-  var ssh_string = "ssh -t " + host + " \"cd " + path + "; bash\""
+  var ssh_string = "ssh -t " + host + " \"cd /" + path + "; bash\""
   console.log("ssh_string is: ", ssh_string)
   var clip_ssh = document.createElement("input")
   document.body.appendChild(clip_ssh);
@@ -27,9 +27,10 @@ function new_exp_copyclipboard_scp(str) {
   }
   // username@hostname/home/username/path/5db6ffb4495575f385b70150
   // scp -r your_username@hostname:/path . 
+  // scp $ your_username@hostname:/path
   var host = str.substr(0, str.indexOf('/'))
   var path = str.substring(str.indexOf('/')+1)
-  var scp_string = "scp -r " + host + ":" + path + "."
+  var scp_string = "scp $ " + host + ":" + path
   console.log("scp_string is: ", scp_string)
   var clip_scp = document.createElement("input")
   document.body.appendChild(clip_scp);

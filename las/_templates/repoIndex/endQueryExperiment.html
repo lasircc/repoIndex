@@ -11,18 +11,22 @@
             <th>Name</th>
             <th>Type</th>
             <th>GenID</th>
-            <th>Description</th>
-            <th>Pipeline</th>
+            <!-- <th>Description</th>
+            <th>Pipeline</th> -->
             <th>Path</th>
         </tr>
         <!-- {{ results }} -->
     {% for q in results %}
         <tr>
-            <td><b>{{ q.exp_name }}</b></td>
-            <td>{{ q.exp_type }}</td>
-            <td>{{ q.genID }}</td>
-            <td>{{ q.description }}</td>
-            <td>{{ q.pipeline }}</td>
+            <td><b>{{ q.name }}</b></td>
+            <td>{{ q.technology.library.type }}</td>
+            <td>
+                {% for p in q.samples_map %}
+                    {{ p.id }}<br>
+                {% endfor %}
+            </td>
+            <!-- <td>{{ q.description }}</td>
+            <td>{{ q.pipeline }}</td> -->
             <td>{{ q.path }}</td>
         </tr>     
     {% endfor %}

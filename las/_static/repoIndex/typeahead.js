@@ -49,8 +49,10 @@ $.typeahead({
     callback: {
         onClick: function (node, a, item, event) {
  
-            var cane = $('#add_exp-host-username');
-            cane.val(item.host_username);
+            var username = $('#add_exp-host-username');
+            username.val(item.host_username);
+            var path = $('#add_exp-host-path');
+            path.val(item.host_path);
  
         },
         onSendRequest: function (node, query) {

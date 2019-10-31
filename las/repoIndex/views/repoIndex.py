@@ -367,7 +367,7 @@ class NewExperimentType(View):
                     upsert = True
                     )
                 
-            inserted_type = db.experiment_types.find_one({'Name' : exp_type_name})
+            inserted_type = db.experiment_types.find_one({'name' : exp_type_name})
             print("inserted_type is:", inserted_type)
 
             return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': inserted_type})
@@ -386,40 +386,45 @@ class QueryExperiment(View):
             print("exp_name = ",request.POST['exp_name'])
             print("genID = ",request.POST['genID'])
             print("exp_type = ",request.POST['exp_type'])
-            print("pipeline = ",request.POST['pipeline'])
+            print("exp_source_vendor = ",request.POST['exp_source_vendor'])
+            print("exp_seqplat_vendor = ",request.POST['exp_seqplat_vendor'])
             print("path = ",request.POST['path'])
-            print("description = ",request.POST['description'])
+            # print("description = ",request.POST['description'])
 
             exp_name = request.POST['exp_name']
             exp_genID = request.POST['genID']
             exp_type = request.POST['exp_type']
-            pipeline = request.POST['pipeline']
+            exp_source_vendor = request.POST['exp_source_vendor']
+            exp_seqplat_vendor = request.POST['exp_seqplat_vendor']
             exp_path = request.POST['path']
-            description = request.POST['description']
 
-            if exp_genID != "":
-                genID = exp_genID.split("\r\n")
-                print("genId is:",genID)
-                print("len genid:", len(genID))
-            else:
-                genID = ""
+            # if exp_genID != "":
+            #     genID = exp_genID.split("\r\n")
+            #     print("genId is:",genID)
+            #     print("len genid:", len(genID))
+            # else:
+            #     genID = ""
 
             query = {}
             if exp_name != "":
                 # query['exp_name'] = { '$eq': exp_name }
-                query['exp_name'] = { '$regex' : ".*"+exp_name+".*" }
-            if genID != "":
-                query['genID'] = { '$in': genID }
+                query['name'] = { '$regex' : ".*"+exp_name+".*", '$options': "ix"}
+            if exp_genID != "":
+                query['samples_map.id'] = { '$regex' : ".*"+exp_genID+".*", '$options': "ix"}
             if exp_type != "":
                 # query['exp_type'] = { '$eq': exp_type }
-                query['exp_type'] = { '$regex' : ".*"+exp_type+".*" }
+                query['technology.library.type'] = { '$regex' : ".*"+exp_type+".*", '$options': "ix"}
+            if exp_source_vendor != "":
+                query['source.vendor'] = { '$regex' : ".*"+exp_source_vendor+".*", '$options': "ix"}
+            if exp_seqplat_vendor != "":
+                query['technology.sequencing_platform.vendor'] = { '$regex' : ".*"+exp_seqplat_vendor+".*", '$options': "ix"}
             if exp_path != "":
-                query['path'] = { '$regex' : ".*"+exp_path+".*" }
-            if pipeline != "":
-                # query['pipeline'] = { '$eq': pipeline }
-                query['pipeline'] = { '$regex' : ".*"+pipeline+".*" }
-            if description != "":
-                query['description'] = { '$regex' : ".*"+description+".*" }
+                query['path'] = { '$regex' : ".*"+exp_path+".*", '$options': "ix"}
+            # if order_date != "":
+            #     # query['pipeline'] = { '$eq': pipeline }
+            #     query['pipeline'] = {date interval}
+            # if received_date != "":
+            #     query['description'] = {date interval}
 
             #add filters by user
 
@@ -427,7 +432,9 @@ class QueryExperiment(View):
             results = list(db.experiments.find(query,{"_id":0}).sort("exp_name",pymongo.ASCENDING))
             for doc in results:
                 print(doc)
-
+            
+            # print("results is: ", results)
+            # gen_id_list = list(db.experiments.find(query,{"_id":0}).sort("exp_name",pymongo.ASCENDING))
             # exp_types=db.experiment_types.find({},{"_id":0}).sort("Name",pymongo.ASCENDING)
             # print('exp_types is:',exp_types)
             # return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
