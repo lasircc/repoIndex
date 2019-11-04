@@ -46,12 +46,13 @@
 	
 
 	<div class="modal"><!-- Place at bottom of page --></div>	
-	
 	<script src="{% static "node_modules/jquery/dist/jquery.min.js" %}"></script>
 	<script src="{% static "node_modules/popper.js/dist/umd/popper.min.js" %}"></script>
 	<script defer src="{% static "node_modules/bootstrap/dist/js/bootstrap.min.js" %}"></script>
 	<script src="{% static "js/intersection-observer.min.js" %}"></script>
-	<script defer src="{% static "node_modules/datatables/media/js/jquery.dataTables.min.js" %}"></script>
+	<!-- <script defer src="{% static "node_modules/datatables/media/js/jquery.dataTables.min.js" %}"></script> -->
+	<script defer src="{% static "node_modules/datatables.net/js/jquery.dataTables.min.js" %}"></script>
+	<script defer src="{% static "node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
 	<script defer src="{% static "node_modules/cookieconsent/build/cookieconsent.min.js" %}"></script>
 	<script defer src="{% static "node_modules/toastr/build/toastr.min.js" %}"></script>
 	<script defer src="{% static "node_modules/pdfmake/build/pdfmake.min.js" %}"></script>
@@ -68,7 +69,8 @@
 	
 
 
-	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/datatables/media/css/jquery.dataTables.min.css" %}"/>
+	<!-- <link async rel="stylesheet" type="text/css" href="{% static "node_modules/datatables/media/css/jquery.dataTables.min.css" %}"/> -->
+	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css" %}" />
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/cookieconsent/build/cookieconsent.min.css"  %}"/>
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/toastr/build/toastr.min.css" %}"/>
 	<link async rel="stylesheet" type="text/css" href="{% static "node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css" %}" />

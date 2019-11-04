@@ -192,6 +192,7 @@ class HostEdit(View):
     def post(self, request):
         try:
             print("entered HostEdit")
+            # HOST_CHANGE_PATH FUNCTIONALITY IS CURRENTLY DISABLED
             # if 'host_change_path' in request.POST:
             #     print("request is: ",request.POST)
             #     print("host = ",request.POST['host_change_address'])

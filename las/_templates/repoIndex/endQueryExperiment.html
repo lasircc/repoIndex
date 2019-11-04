@@ -1,21 +1,39 @@
 {% extends "_general/base.html" %}
 
 {% block content %}
+
+{% load staticfiles %}
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src = "{% static "repoIndex/querytable.js" %}"></script>
+
 <h2><b>Query results</b></h2>
 <div>
     <br>
     Experiments matching query
     <br><br>
-    <table class="table table-striped">
+    <table id="queryResults" class="table table-striped table-sm" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th class="th-sm">Name      
+            </th>
+            <th class="th-sm">Type      
+            </th>
+            <th class="th-sm">GenID
+            </th>
+            <th class="th-sm">Path
+          </tr>
+        </thead>
+    <!-- <table class="table table-striped">
         <tr>
             <th>Name</th>
             <th>Type</th>
             <th>GenID</th>
-            <!-- <th>Description</th>
-            <th>Pipeline</th> -->
+            <th>Description</th>
+            <th>Pipeline</th>
             <th>Path</th>
-        </tr>
+        </tr> -->
         <!-- {{ results }} -->
+        <tbody>
     {% for q in results %}
         <tr>
             <td><b>{{ q.name }}</b></td>
@@ -30,6 +48,7 @@
             <td>{{ q.path }}</td>
         </tr>     
     {% endfor %}
+    </tbody>
     </table>
 </div>
 {% endblock %}

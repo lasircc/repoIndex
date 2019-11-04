@@ -1,23 +1,10 @@
 {% extends "_general/base.html" %}
 
 {% block content %}
-<!-- <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-</style> -->
+
+{% load staticfiles %}
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src = "{% static "repoIndex/querytable.js" %}"></script>
 
 <h2><b>Experiment types</b></h2>
 <div>
@@ -27,17 +14,25 @@
       <input type = "submit" value = "Add new" class="btn btn-primary"/>
     </form>
     <br><br>
-    <table class="table table-striped">
+
+    <table id="expTypes" class="table table-striped table-sm" cellspacing="0" width="100%">
+      <thead>
         <tr>
-            <th>Name</th>
-            <th>Description</th>
+          <th class="th-sm">Name      
+          </th>
+          <th class="th-sm">Description      
+          </th>
         </tr>
-    {% for exp_type in exp_types %}
-        <tr>
+      </thead>
+      <tbody>
+        {% for exp_type in exp_types %}
+          <tr>
             <td><b>{{ exp_type.Name }}</b></td>
             <td>{{ exp_type.Description }}</td>
-        </tr>     
-    {% endfor %}
+          </tr>     
+        {% endfor %}
+      </tbody>
     </table>
+
 </div>
 {% endblock %}
