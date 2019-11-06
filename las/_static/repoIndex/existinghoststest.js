@@ -57,6 +57,7 @@ $(document).ready(function() {
                 + "<input type=\"hidden\" name=\"host_edit_toggle\" value=\"ENABLED\"/>"
                 + "<input type=\"hidden\" name=\"csrfmiddlewaretoken\" value=\""+ getCookie('csrftoken') +"\"/>"
                 + "<input type=\"hidden\" name=\"host_edit_path\" value=\""+ item.path +"\"/>"
+                + "<input type=\"hidden\" name=\"host_edit_description\" value=\""+ item.description +"\"/>"
                 + "<input type=\"submit\" value=\"Edit\" class=\"btn btn-primary btn-sm\"/></td></form></tr>"
 
                 var host_row_html = "<tr><td>"+ item.status +"</td><td>"+ item.address +"</td><td>"+ item.path +"</td><td>"

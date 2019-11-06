@@ -175,11 +175,12 @@ class LandHostEdit(View):
             print("hostname = ",request.POST['host_edit_address'])
             print("host_username = ",request.POST['host_edit_path'])
             print("host_toggle = ",request.POST['host_edit_toggle'])
+            print("host_description = ",request.POST['host_edit_description'])
             host_edit = {}
             host_edit['address'] = request.POST['host_edit_address']
             host_edit['path'] = request.POST['host_edit_path']
             host_edit['toggle'] = request.POST['host_edit_toggle']
-            # if description needed query the db here and pass it to the next view
+            host_edit['description'] = request.POST['host_edit_description']
             print("host_edit is:", host_edit)
             return render(request, 'repoIndex/hostEdit.html', {'host_edit': host_edit})
 
@@ -316,7 +317,7 @@ class LandHostManager(View):
     def get(self, request):
         try:
             print("entered LandHostManager")
-            existing_disabled_hosts = db.hosts.find({"enabled": False},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
+            existing_disabled_hosts = db.hosts.find({"enabled": False},{"_id":0}).sort("hostname",pymongo.ASCENDING)
             # conn_results = {}
             disabled_hosts = []
             for doc in existing_disabled_hosts:
@@ -326,10 +327,12 @@ class LandHostManager(View):
                 username = doc['host_username']
                 password = doc['host_password']
                 path = doc['host_path']
-                print("hostname=",hostname)
-                print("username=",username)
-                print("password=",password)
-                print("path=",path)
+                description = doc['description']
+                print("hostname=", hostname)
+                print("username=", username)
+                print("password=", password)
+                print("path=", path)
+                print("description=", description)
                 # valid = testConnection(hostname,username,password,path)
                 # print("valid connection test is:",valid)
 
@@ -344,6 +347,7 @@ class LandHostManager(View):
                 host_status["address"] = address
                 host_status["path"] = path
                 host_status["status"] = status
+                host_status["description"] = description
                 disabled_hosts.append(host_status.copy())
 
             print("disabled_hosts is: ",disabled_hosts)
@@ -358,7 +362,7 @@ class ExistingHostsTest(View):
     def post(self, request):
         try:
             print("entered ExistingHostsTest")
-            existing_hosts = db.hosts.find({"enabled": True},{"_id":0,"description":0}).sort("hostname",pymongo.ASCENDING)
+            existing_hosts = db.hosts.find({"enabled": True},{"_id":0,}).sort("hostname",pymongo.ASCENDING)
             # conn_results = {}
             conn_results = []
             for doc in existing_hosts:
@@ -368,10 +372,12 @@ class ExistingHostsTest(View):
                 username = doc['host_username']
                 password = doc['host_password']
                 path = doc['host_path']
+                description = doc['description']
                 print("hostname=",hostname)
                 print("username=",username)
                 print("password=",password)
                 print("path=",path)
+                print("description=", description)
                 valid = testConnection(hostname,username,password,path)
                 # valid="OK"
                 print("valid connection test is:",valid)
@@ -387,6 +393,7 @@ class ExistingHostsTest(View):
                 host_status["address"] = address
                 host_status["path"] = path
                 host_status["status"] = status
+                host_status["description"] = description
                 conn_results.append(host_status.copy())
 
             print("conn_results is: ",conn_results)
