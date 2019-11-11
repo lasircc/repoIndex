@@ -249,8 +249,17 @@ class AddExperiment(View):
                 print("exp_name is:", exp_name)
                 existing_exp = db.experiments.find_one({'name': exp_name})
                 print("existing_exp is:",existing_exp)
+
+                exp_type = data_exp['technology']['library']['type']
+                existing_type = db.experiment_types.find_one({'Name': exp_type})
+                print("exp_type is:", existing_type)
+
                 if existing_exp is not None:
-                    error_string = "The chosen Experiment Name already exists"
+                    error_string = "The chosen Experiment Name (" + exp_name + ") already exists"
+                    print(error_string)
+                    return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string})
+                elif existing_type is None:
+                    error_string = "The chosen Experiment Type (" + exp_type + ") does not exist"
                     print(error_string)
                     return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string})
                 else:
