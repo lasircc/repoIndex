@@ -262,6 +262,42 @@ class HostEdit(View):
                 print("modified_host is:", modified_host)
                 return render(request, 'repoIndex/endRegisterHost.html',{'modified_host': modified_host})
 
+            if 'host_change_description' in request.POST:
+                print("host change description = ",request.POST['host_change_description'])
+                # print("host_new_password = ",request.POST['host_change_password'])
+
+                address = request.POST['host_change_address']
+                host_new_description = request.POST['host_change_description']
+                username = address.split('@')[0]
+                hostname = address.split('@')[1]
+
+                print("username is: ",username)
+                print("hostname is: ",hostname)
+
+                # message = host_new_password.encode()
+                # print("K:",key)
+                # f = Fernet(key)
+                # print("F:",f)
+                # encrypted_pw = f.encrypt(message)
+                # # decrypted_pw = f.decrypt(encrypted_pw)
+                # print("ENC",encrypted_pw)
+
+                target_host = db.hosts.find_one_and_update(
+                        {'hostname' : hostname, 'host_username' : username},
+                        {"$set":{
+                            'description': host_new_description,
+                            }
+                        },
+                        return_document = ReturnDocument.AFTER
+                    )
+
+                modified_host_id = target_host['_id']
+                print("modified target_host is:", modified_host_id)
+
+                modified_host = db.hosts.find_one({"_id" : modified_host_id })
+                print("modified_host is:", modified_host)
+                return render(request, 'repoIndex/endRegisterHost.html',{'modified_host': modified_host})
+
             if 'host_disable' in request.POST:
                 print("host disable = ",request.POST['host_disable'])
 
