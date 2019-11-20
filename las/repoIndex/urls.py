@@ -20,5 +20,4 @@ urlpatterns = [
     path('existingHostsTest/', ExistingHostsTest.as_view(), name='existingHostsTest'),
     path('autocompleteHostsAddExperiment/', AutocompleteHostsAddExperiment.as_view(), name='autocompleteHostsAddExperiment'),
     # path('validateGenID/', ValidateGenID.as_view(), name='validateGenID')
-    # path('addUser/', AddUser.as_view(), name="addUser")
 ]

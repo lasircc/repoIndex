@@ -13,9 +13,16 @@ $(document).ready(function() {
                 } else if ( item['status'] == "PATH" ) {
                     // $('<td>').value("<td><span class=\"badge badge-pill badge-warning\">PATH</span></td>");
                     item.status = "<span class=\"badge badge-pill badge-warning\">PATH</span>"
-                } else {
+                } else if ( item['status'] == "DOWN" ){
                     // $('<td>').value("<td><span class=\"badge badge-pill badge-danger\">DOWN</span></td>");
                     item.status = "<span class=\"badge badge-pill badge-danger\">DOWN</span>"
+                }
+                else {
+                    item.status = "<span class=\"badge badge-pill badge-dark\">ERROR</span>"
+                    var host_row_html = "<tr><td>"+ item.status +"</td><td>"+ item.description+"</td><td>"
+                    var html_string = host_row_html
+                    var $tr = $(html_string).appendTo('#existing_hosts');
+                    return false; //get out of $.each() w/o form etc
                 }
 
                 // var csrf_token = '{{ csrf_token }}'
@@ -37,7 +44,7 @@ $(document).ready(function() {
         error: function (xhr, ajaxOptions, thrownError) {
             var errorMsg = 'Ajax request failed: ' + xhr.responseText;
             $('#content').html(errorMsg);
-            alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+            // alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
           }
     });
 });

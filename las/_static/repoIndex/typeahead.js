@@ -40,7 +40,8 @@ $.typeahead({
                         }
                     },
                     error: function(xhr){
-                        alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                        // alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                        alert('Error during hosts retrieval for autocomplete')
                     }
                 }
             },
@@ -105,7 +106,7 @@ $.typeahead({
                         }
                     },
                     error: function(xhr){
-                        alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                        alert('Error during experiment types retrieval for autocomplete')
                     }
                 }
             },

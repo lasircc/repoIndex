@@ -1,0 +1,13 @@
+{% extends "_general/base.html" %}
+
+{% block content %}
+
+<div class="col">
+    <br>
+    <h2><b>An error occurred processing your query</b></h2>
+    <div>
+        <br>
+        {{ error_string|linebreaks }}
+    </div>
+</div>
+{% endblock %}

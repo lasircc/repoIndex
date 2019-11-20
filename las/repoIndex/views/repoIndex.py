@@ -55,7 +55,8 @@ class LandQueryExperimentType(View):
                 return render(request, 'repoIndex/queryExperimentType.html',{'exp_types': exp_types})
         except Exception as e:
             print ('Error LandQueryExperimentType', e)
-            return redirect('/')
+            error_string = "Error retrieving experiment types " + str(e)
+            return render(request,'repoIndex/errorQuery.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class LandQueryExperiment(View):
@@ -330,8 +331,9 @@ class AddExperiment(View):
                 return render(request, 'repoIndex/errorUploading.html',{'error_string': error_string, 'valid': valid})
 
         except Exception as e:
-            print ('Error AddExperiment', e)
-            return redirect('/')
+            print ("Error AddExperiment", e)
+            error_string = "Error adding experiment " + str(e)
+            return render(request,'repoIndex/errorUploading.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class QueryExperimentType(View):
@@ -341,7 +343,8 @@ class QueryExperimentType(View):
             return render(request, 'repoIndex/queryExperimentType.html')
         except Exception as e:
             print ('Error QueryExperimentType', e)
-            return redirect('/')
+            error_string = "Error querying experiment type " + str(e)
+            return render(request, 'repoIndex/errorQuery.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class NewExperimentType(View):
@@ -382,8 +385,9 @@ class NewExperimentType(View):
             return render(request, 'repoIndex/endNewExperimentType.html',{'inserted_type': inserted_type})
 
         except Exception as e:
-            print ('Error NewExperimentType', e)
-            return redirect('/')
+            print ("Error NewExperimentType", e)
+            error_string = "Error inserting new experiment type " + str(e)
+            return render(request, 'repoIndex/errorNewExperimentType.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class QueryExperiment(View):
@@ -450,6 +454,7 @@ class QueryExperiment(View):
 
             return render(request, 'repoIndex/endQueryExperiment.html',{'results': results})
         except Exception as e:
-            print ('Error QueryExperiment', e)
-            return redirect('/')
+            print ("Error QueryExperiment", e)
+            error_string = "Error executing your query " + str(e)
+            return render(request,'repoIndex/errorQuery.html',{'error_string': error_string})
 

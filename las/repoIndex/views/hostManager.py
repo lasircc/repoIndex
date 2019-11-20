@@ -165,7 +165,8 @@ class HostRegister(View):
 
         except Exception as e:
             print ('Error HostRegister API', e)
-            return redirect('/')
+            error_string = "An error occurred in Host Register API:" + e
+            return render(request, 'repoIndex/errorRegisterHost.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class LandHostEdit(View):
@@ -186,7 +187,8 @@ class LandHostEdit(View):
 
         except Exception as e:
             print ('Error LandHostEdit', e)
-            return redirect('/')
+            error_string = "An error occurred in Host Edit:" + e
+            return render(request, 'repoIndex/errorEditHost.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class HostEdit(View):
@@ -346,7 +348,8 @@ class HostEdit(View):
 
         except Exception as e:
             print ('Error HostEdit', e)
-            return redirect('/')
+            error_string = "An error occurred in Host Edit procedure  " + str(e)
+            return render(request, 'repoIndex/errorEditHost.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class LandHostManager(View):
@@ -391,7 +394,8 @@ class LandHostManager(View):
         
         except Exception as e:
             print ('Error LandHostManager API', e)
-            return redirect('/')
+            error_string = "Error retrieving existing hosts " + str(e)
+            return render(request,'repoIndex/errorLandHost.html',{'error_string': error_string})
 
 @method_decorator([login_required], name='dispatch')
 class ExistingHostsTest(View):
@@ -438,7 +442,14 @@ class ExistingHostsTest(View):
         
         except Exception as e:
             print ('Error ExistingHostsTest API', e)
-            return redirect('/')
+            host_status = {}
+            conn_results = []
+            status = "X"
+            host_status["status"] = status
+            host_status["description"] = "Error during connection test"
+            conn_results.append(host_status.copy())
+            print("conn_results is: ",conn_results)
+            return JsonResponse(conn_results, safe=False)
 
 class AutocompleteHostsAddExperiment(View):
     def get(self, request):
