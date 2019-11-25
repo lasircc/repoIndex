@@ -313,6 +313,9 @@ class AddExperiment(View):
                         print(conn_test)
                         return render(request, 'repoIndex/errorUploading.html',{'error_string': make_folder})
                 
+                    if path.endswith("/"):
+                        path = path[:-1]
+
                     exp_path = username+"@"+hostname+path+"/"+str(exp_objID)
                     print("exp_path is:", exp_path)
                     db.experiments.update({'_id': exp_objID}, {"$set": {'path': exp_path}})
@@ -421,16 +424,16 @@ class QueryExperiment(View):
             query = {}
             if exp_name != "":
                 # query['exp_name'] = { '$eq': exp_name }
-                query['name'] = { '$regex' : ".*"+exp_name+".*", '$options': "ix"}
+                query['name'] = { '$regex' : ".*"+exp_name+".*", '$options': "i"}
             if exp_genID != "":
                 query['samples_map.id'] = { '$regex' : ".*"+exp_genID+".*", '$options': "ix"}
             if exp_type != "":
                 # query['exp_type'] = { '$eq': exp_type }
-                query['technology.library.type'] = { '$regex' : ".*"+exp_type+".*", '$options': "ix"}
+                query['technology.library.type'] = { '$regex' : ".*"+exp_type+".*", '$options': "i"}
             if exp_source_vendor != "":
-                query['source.vendor'] = { '$regex' : ".*"+exp_source_vendor+".*", '$options': "ix"}
+                query['source.vendor'] = { '$regex' : ".*"+exp_source_vendor+".*", '$options': "i"}
             if exp_seqplat_vendor != "":
-                query['technology.sequencing_platform.vendor'] = { '$regex' : ".*"+exp_seqplat_vendor+".*", '$options': "ix"}
+                query['technology.sequencing_platform.vendor'] = { '$regex' : ".*"+exp_seqplat_vendor+".*", '$options': "i"}
             if exp_path != "":
                 query['path'] = { '$regex' : ".*"+exp_path+".*", '$options': "ix"}
             # if order_date != "":
