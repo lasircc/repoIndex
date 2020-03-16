@@ -242,7 +242,12 @@ class AddExperiment(View):
             genid_list = list(extract_GenID("LAS_Validation",data_exp['samples_map']))
             print("GENIDS are:")
             print(genid_list)
-            valid = validateGenID(genid_list)
+            if len(genid_list) > 0:
+                valid = validateGenID(genid_list)
+            else:
+                print("All GenIDs did not require validation")
+                valid = "OK"
+
             print("valid is:", valid)
 
             if valid == "OK":
