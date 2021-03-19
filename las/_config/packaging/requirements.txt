@@ -2,7 +2,7 @@ amqp>=2.3.2
 billiard>=3.5.0.4
 celery>=4.2
 Django>=2.2
-djangorestframework==3.9.3 # waiting for fixes before moving on to next versions
+djangorestframework==3.11.2 # waiting for fixes before moving on to next versions
 django-bootstrap-breadcrumbs>=0.9.1
 kombu>=4.2.1
 Markdown>=2.6.11
